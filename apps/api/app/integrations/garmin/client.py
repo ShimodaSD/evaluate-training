@@ -62,7 +62,7 @@ class GarminClient:
         content = self._request(
             "GET",
             DOWNLOAD_PATH.format(activity_id=int(activity_id)),
-            headers={"Accept": "application/zip, application/octet-stream"},
+            headers={"Accept": "*/*"},  # a Garmin responde 406 a tipos específicos
         ).content
         try:
             with zipfile.ZipFile(io.BytesIO(content)) as archive:

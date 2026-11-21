@@ -42,6 +42,13 @@ def analyze_week(client: anthropic.Anthropic, model: str, week: WeekSummary) -> 
         raise CoachError("ANTHROPIC_API_KEY inválida") from exc
     except anthropic.RateLimitError as exc:
         raise CoachError("limite de uso da API da Anthropic atingido; tente mais tarde") from exc
+    except anthropic.BadRequestError as exc:
+        if "credit balance" in str(exc).lower():
+            raise CoachError(
+                "a conta da Anthropic está sem créditos: "
+                "https://platform.claude.com/settings/billing"
+            ) from exc
+        raise CoachError(f"a API da Anthropic recusou a requisição: {exc.message}") from exc
     except anthropic.APIStatusError as exc:
         raise CoachError(f"a API da Anthropic respondeu {exc.status_code}") from exc
     except anthropic.APIConnectionError as exc:

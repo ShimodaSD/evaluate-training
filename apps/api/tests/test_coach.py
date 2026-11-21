@@ -2,7 +2,7 @@ from types import SimpleNamespace
 
 import httpx
 import pytest
-from anthropic import AuthenticationError
+from anthropic import AuthenticationError, BadRequestError
 from fastapi.testclient import TestClient
 
 from app.api.routes.weeks import get_anthropic_client
@@ -88,6 +88,18 @@ def test_semana_vazia_nao_chama_o_claude(client: TestClient) -> None:
                 )
             ),
             "ANTHROPIC_API_KEY inválida",
+        ),
+        (
+            FakeMessages(
+                error=BadRequestError(
+                    "Your credit balance is too low to access the Anthropic API.",
+                    response=httpx.Response(
+                        400, request=httpx.Request("POST", "https://api.anthropic.com")
+                    ),
+                    body=None,
+                )
+            ),
+            "sem créditos",
         ),
     ],
 )
