@@ -531,3 +531,8 @@ summary:focus-visible {
   margin: 0 auto 20px;
   color: var(--text-secondary);
 }
+
+.coach__text {
+  white-space: pre-wrap;
+  margin: 12px 0 0;
+}

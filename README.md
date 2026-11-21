@@ -132,3 +132,15 @@ A sincronização busca as corridas do período, baixa o arquivo FIT original de
 (com as voltas, para a comparação passo a passo) e ignora atividades já importadas,
 inclusive as enviadas antes por upload de arquivo. `/api/health` informa em
 `garmin_configured` se a chave foi definida.
+
+## Avaliação com o Claude
+
+O card **Avaliação do Claude** no painel manda o planejado x realizado da semana para a
+API da Anthropic (modelo `claude-opus-5-5`, configurável em `ANTHROPIC_MODEL`) e mostra
+um parecer curto: veredito, o que foi bem, o que fugiu do plano e uma recomendação.
+
+1. Crie uma chave em https://platform.claude.com/settings/keys
+2. Coloque no `.env`: `ANTHROPIC_API_KEY=sua-chave`
+3. Clique em **Avaliar semana** (ou `POST /api/weeks/{data}/analysis`).
+
+Cada avaliação é uma chamada paga à API e só acontece quando você clica.

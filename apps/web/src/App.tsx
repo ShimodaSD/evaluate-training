@@ -3,6 +3,7 @@ import { useSWRConfig } from 'swr'
 import { deletePlannedWorkout } from './api/client'
 import { ActivityUpload } from './components/ActivityUpload'
 import { AdherenceHero } from './components/AdherenceHero'
+import { CoachCard } from './components/CoachCard'
 import { DayList } from './components/DayList'
 import { Dialog } from './components/Dialog'
 import { DistanceChart } from './components/DistanceChart'
@@ -97,6 +98,7 @@ function App() {
           <div className="grid">
             <AdherenceHero week={week} />
             <NextAction week={week} today={today} onUpload={() => setPanel('upload')} />
+            <CoachCard key={week.week_start} day={week.week_start} />
             <DistanceChart days={week.days} />
             <DayList days={week.days} today={today} onDelete={handleDelete} />
           </div>
