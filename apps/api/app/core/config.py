@@ -16,15 +16,16 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:5173"]
     timezone: str = "America/Sao_Paulo"
 
-    # Credenciais da API Garmin Connect (usadas no passo 4)
-    garmin_base_url: str = "https://apis.garmin.com"
-    garmin_client_id: str | None = None
-    garmin_client_secret: SecretStr | None = None
-    garmin_access_token: SecretStr | None = None
+    # Garmin Connect Personal API: chave criada em
+    # https://connect.garmin.com/app/settings/personalApiToken
+    garmin_base_url: str = "https://personal.connectapi.garmin.com"
+    garmin_personal_api_key: SecretStr | None = None
 
     @property
     def garmin_configured(self) -> bool:
-        return bool(self.garmin_client_id and self.garmin_client_secret)
+        return bool(
+            self.garmin_personal_api_key and self.garmin_personal_api_key.get_secret_value()
+        )
 
 
 @lru_cache

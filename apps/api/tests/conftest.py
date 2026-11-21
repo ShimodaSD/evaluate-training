@@ -24,8 +24,7 @@ def week_text() -> str:
 def settings() -> Settings:
     return Settings(
         _env_file=None,
-        garmin_client_id=None,
-        garmin_client_secret=None,
+        garmin_personal_api_key=None,
         timezone="America/Sao_Paulo",
     )
 
