@@ -120,6 +120,15 @@ de IA estão em [AGENTS.md](AGENTS.md).
 
 ## Integração Garmin
 
-As credenciais da API Garmin Connect são lidas do `.env`
-(`GARMIN_CLIENT_ID`, `GARMIN_CLIENT_SECRET`, `GARMIN_ACCESS_TOKEN`).
-O endpoint `/api/health` informa em `garmin_configured` se elas foram definidas.
+Usa a [Garmin Connect Personal API](https://developer.garmin.com/gc-developer-program/personal/personal-api/).
+
+1. Crie uma chave em https://connect.garmin.com/app/settings/personalApiToken
+   (ela aparece uma única vez; validade de 30 dias a 1 ano).
+2. Coloque no `.env`: `GARMIN_PERSONAL_API_KEY=sua-chave`.
+3. No painel, em **Enviar atividade**, clique em **Sincronizar corridas do Garmin**
+   (ou `POST /api/garmin/sync?start=AAAA-MM-DD&end=AAAA-MM-DD`; padrão: últimos 7 dias).
+
+A sincronização busca as corridas do período, baixa o arquivo FIT original de cada uma
+(com as voltas, para a comparação passo a passo) e ignora atividades já importadas,
+inclusive as enviadas antes por upload de arquivo. `/api/health` informa em
+`garmin_configured` se a chave foi definida.

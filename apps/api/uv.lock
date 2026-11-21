@@ -83,6 +83,7 @@ dependencies = [
     { name = "fastapi" },
     { name = "fitdecode" },
     { name = "gpxpy" },
+    { name = "httpx" },
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic-settings" },
     { name = "python-multipart" },
@@ -93,7 +94,6 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "fit-tool" },
-    { name = "httpx" },
     { name = "pytest" },
     { name = "ruff" },
 ]
@@ -104,6 +104,7 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.115" },
     { name = "fitdecode", specifier = ">=0.11.0" },
     { name = "gpxpy", specifier = ">=1.6.2" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2" },
     { name = "pydantic-settings", specifier = ">=2.6" },
     { name = "python-multipart", specifier = ">=0.0.12" },
@@ -114,7 +115,6 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "fit-tool", specifier = ">=0.10.0" },
-    { name = "httpx", specifier = ">=0.27" },
     { name = "pytest", specifier = ">=8.3" },
     { name = "ruff", specifier = ">=0.8" },
 ]

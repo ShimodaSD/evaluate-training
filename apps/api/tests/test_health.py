@@ -14,7 +14,7 @@ def test_health_retorna_ok(client: TestClient) -> None:
 
 
 def test_health_indica_garmin_configurado(client: TestClient) -> None:
-    configured = Settings(_env_file=None, garmin_client_id="id", garmin_client_secret="secret")
+    configured = Settings(_env_file=None, garmin_personal_api_key="chave")
     client.app.dependency_overrides[get_settings] = lambda: configured
 
     response = client.get("/api/health")

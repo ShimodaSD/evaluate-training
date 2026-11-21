@@ -1,5 +1,5 @@
 import { useState, type DragEvent } from 'react'
-import { uploadActivities } from '../api/client'
+import { syncGarmin, uploadActivities } from '../api/client'
 import type { UploadResult } from '../api/types'
 import { formatKm, formatPace, formatWeekday } from '../lib/format'
 
@@ -11,12 +11,11 @@ export function ActivityUpload({ onUploaded }: { onUploaded: () => void }) {
   const [uploading, setUploading] = useState(false)
   const [dragging, setDragging] = useState(false)
 
-  async function send(files: File[]) {
-    if (files.length === 0) return
+  async function run(action: () => Promise<UploadResult>) {
     setUploading(true)
     setError(null)
     try {
-      setResult(await uploadActivities(files))
+      setResult(await action())
       onUploaded()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Falha no envio')
@@ -25,10 +24,14 @@ export function ActivityUpload({ onUploaded }: { onUploaded: () => void }) {
     }
   }
 
+  function send(files: File[]) {
+    if (files.length > 0) void run(() => uploadActivities(files))
+  }
+
   function handleDrop(event: DragEvent) {
     event.preventDefault()
     setDragging(false)
-    void send(Array.from(event.dataTransfer.files))
+    send(Array.from(event.dataTransfer.files))
   }
 
   return (
@@ -47,11 +50,19 @@ export function ActivityUpload({ onUploaded }: { onUploaded: () => void }) {
           multiple
           accept={ACCEPT}
           className="visually-hidden"
-          onChange={(e) => void send(Array.from(e.target.files ?? []))}
+          onChange={(e) => send(Array.from(e.target.files ?? []))}
         />
         <strong>{uploading ? 'Enviando...' : 'Arraste os arquivos ou clique para escolher'}</strong>
         <span className="muted">FIT, GPX ou TCX exportados do Garmin Connect</span>
       </label>
+      <button
+        type="button"
+        className="button button--secondary"
+        disabled={uploading}
+        onClick={() => void run(syncGarmin)}
+      >
+        Sincronizar corridas do Garmin (últimos 7 dias)
+      </button>
       {error ? (
         <p className="alert alert--error" role="alert">
           {error}
