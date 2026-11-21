@@ -60,6 +60,56 @@ make lint     # ruff + oxlint + prettier + tsc
 make format   # formata o código
 ```
 
+## Banco de dados
+
+As migrações ficam em `apps/api/migrations` (Alembic) e rodam automaticamente
+ao subir a API pelo Docker. Sem Docker: `make migrate`.
+
+Para criar uma nova migração depois de alterar os modelos:
+
+```bash
+cd apps/api && uv run alembic revision --autogenerate -m "descricao"
+```
+
+## API
+
+| Método | Rota | Descrição |
+| --- | --- | --- |
+| `POST` | `/api/planned-workouts/preview` | Interpreta o texto do TrainingPeaks sem salvar |
+| `POST` | `/api/planned-workouts` | Salva um treino planejado (`scheduled_date`, `text`, `title`) |
+| `GET` | `/api/planned-workouts?start=&end=` | Lista treinos planejados |
+| `DELETE` | `/api/planned-workouts/{id}` | Remove um treino planejado |
+| `POST` | `/api/activities/upload` | Upload de arquivos `.fit`, `.gpx` ou `.tcx` (campo `files`) |
+| `GET` | `/api/activities?start=&end=` | Lista atividades realizadas |
+| `DELETE` | `/api/activities/{id}` | Remove uma atividade |
+| `GET` | `/api/weeks/{data}` | Planejado x realizado da semana (seg a dom) que contém a data |
+
+### Formato do treino planejado
+
+Texto copiado do TrainingPeaks, um passo por cabeçalho numerado:
+
+```
+1. Aquecimento — Z1
+2.00 km @ 05:44-06:23 min/km
+Zona 1-Zona 2
+2. Repeat 5 times
+   1. Série principal — VO2
+1.20 km @ 04:08-04:15 min/km
+Zona 5-Zona 6
+   2. Pausa — Passiva
+2:30 @ 00:00 min/km
+```
+
+### Como a aderência é calculada
+
+- Quando a atividade tem uma volta por passo (treino estruturado executado no relógio),
+  cada passo é comparado com sua volta. Uma volta extra no final é ignorada.
+- Caso contrário, compara-se o total; o pace médio só é avaliado em treinos com um
+  único passo de corrida (rodagem contínua).
+- Pace dentro da faixa alvo com tolerância de 5 s/km. Passos de pausa não contam.
+- Aderência = média entre a nota de distância (`1 - |realizado/planejado - 1|`) e a
+  fração de passos no pace alvo. A partir de 80% o treino conta como cumprido.
+
 ## Integração Garmin
 
 As credenciais da API Garmin Connect são lidas do `.env`

@@ -1,4 +1,4 @@
-.PHONY: install up down test test-api test-web lint format
+.PHONY: install up down migrate test test-api test-web lint format
 
 install:
 	cd apps/api && uv sync
@@ -9,6 +9,9 @@ up:
 
 down:
 	docker compose down
+
+migrate:
+	cd apps/api && uv run alembic upgrade head
 
 test: test-api test-web
 

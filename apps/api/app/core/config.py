@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     api_prefix: str = "/api"
     database_url: str = "postgresql+psycopg://training:training@localhost:5432/training"
     cors_origins: list[str] = ["http://localhost:5173"]
+    timezone: str = "America/Sao_Paulo"
 
     # Credenciais da API Garmin Connect (usadas no passo 4)
     garmin_base_url: str = "https://apis.garmin.com"
