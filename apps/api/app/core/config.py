@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     garmin_base_url: str = "https://personal.connectapi.garmin.com"
     garmin_personal_api_key: SecretStr | None = None
 
+    # Avaliação da semana com o Claude (https://platform.claude.com)
+    anthropic_api_key: SecretStr | None = None
+    anthropic_model: str = "claude-opus-5-5"
+
     @property
     def garmin_configured(self) -> bool:
         return bool(

@@ -64,3 +64,7 @@ class WeekSummary(BaseModel):
     completed_workouts: int
     adherence_pct: float | None
     days: list[DaySummary]
+
+
+class WeekAnalysis(BaseModel):
+    analysis: str

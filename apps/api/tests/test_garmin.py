@@ -78,6 +78,7 @@ def test_download_extrai_o_fit_do_zip() -> None:
 
     with fake.client() as client:
         assert client.download_fit(7) == fit
+    assert fake.requests[-1].headers["Accept"] == "*/*"
 
 
 @pytest.fixture

@@ -39,6 +39,9 @@ export function uploadActivities(files: File[]) {
   return request<UploadResult>('/activities/upload', { method: 'POST', body: form })
 }
 
+export const analyzeWeek = (day: string) =>
+  request<{ analysis: string }>(`/weeks/${day}/analysis`, { method: 'POST' })
+
 export const syncGarmin = () => request<UploadResult>('/garmin/sync', { method: 'POST' })
 
 export type { WeekSummary }
