@@ -20,9 +20,11 @@ Dashboard para avaliar treinos de corrida, comparando o treino planejado da sema
 │   │   └── tests/           # Testes com pytest
 │   └── web/                 # Frontend React + TypeScript (Vite)
 │       └── src/
-│           ├── api/         # Cliente HTTP da API
-│           ├── components/  # Componentes (com testes *.test.tsx)
-│           └── test/        # Setup do Vitest
+│           ├── api/         # Cliente HTTP e tipos da API
+│           ├── components/  # Painel, gráfico, formulários (com testes *.test.tsx)
+│           ├── hooks/       # Hooks de dados (SWR)
+│           ├── lib/         # Formatação de km, pace e datas
+│           └── test/        # Setup, fixtures e helpers do Vitest
 ├── docker-compose.yml       # Postgres + API + Web
 ├── Makefile                 # Atalhos de desenvolvimento
 └── .env.example             # Variáveis de ambiente (inclui credenciais Garmin)
@@ -109,6 +111,12 @@ Zona 5-Zona 6
 - Pace dentro da faixa alvo com tolerância de 5 s/km. Passos de pausa não contam.
 - Aderência = média entre a nota de distância (`1 - |realizado/planejado - 1|`) e a
   fração de passos no pace alvo. A partir de 80% o treino conta como cumprido.
+
+## Fluxo de trabalho
+
+O projeto usa **gitflow**: funcionalidades em `feature/*` com PR para `develop`;
+`release/*` e `hotfix/*` levam para `main`. Padrões de código e regras para agentes
+de IA estão em [AGENTS.md](AGENTS.md).
 
 ## Integração Garmin
 
