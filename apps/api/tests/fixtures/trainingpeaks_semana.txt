@@ -1,0 +1,42 @@
+1. Active
+8.00 km @ 05:19-05:35 min/km
+Zona 2
+
+
+1. Aquecimento — Z1
+2.00 km @ 05:44-06:23 min/km
+Zona 1-Zona 2
+2. Repeat 3 times
+   1. Ativação — Z4
+0.20 km @ 04:28-04:42 min/km
+Zona 4-Zona 5
+   2. Ativação — Z1
+0.30 km @ 05:44-06:23 min/km
+Zona 1-Zona 2
+3. Transição — Z0
+0.50 km @ 06:23-07:27 min/km
+Zona 0-Zona 1
+4. Repeat 5 times
+   1. Série principal — VO2
+1.20 km @ 04:08-04:15 min/km
+Zona 5-Zona 6
+   2. Pausa — Passiva
+2:30 @ 00:00 min/km
+5. Volta à calma — Z1
+1.00 km @ 05:44-06:23 min/km
+Zona 1-Zona 2
+
+
+1. Warm up
+2.00 km @ 05:35-06:23 min/km
+Zona 1-Zona 2
+2. Repeat 2 times
+   1. Hard
+3.00 km @ 04:15-04:28 min/km
+Zona 5
+   2. Easy
+1.00 km @ 05:35-06:23 min/km
+Zona 1-Zona 2
+3. Cool down
+1.00 km @ 05:35-06:23 min/km
+Zona 1-Zona 2
