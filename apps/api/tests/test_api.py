@@ -3,6 +3,7 @@ import datetime as dt
 from fastapi.testclient import TestClient
 from fit_tool.profile.profile_type import Sport
 
+from app.core.config import Settings
 from tests.factories import build_fit, build_tcx
 
 MONDAY = dt.date(2026, 11, 16)
@@ -199,3 +200,12 @@ def test_treino_no_rolo_avaliado_pela_potencia(client: TestClient) -> None:
     assert [s["pace_status"] for s in steps] == ["in_range", "slow"]
     assert workout["comparison"]["distance_ratio"] is None  # só duração: nota só da potência
     assert workout["comparison"]["adherence_pct"] == 50
+
+
+def test_semana_comeca_no_dia_configurado(client: TestClient, settings: Settings) -> None:
+    settings.week_start_weekday = 1  # terça
+
+    week = client.get("/api/weeks/2026-11-16").json()  # segunda é o fim da semana anterior
+
+    assert (week["week_start"], week["week_end"]) == ("2026-11-10", "2026-11-16")
+    assert week["days"][0]["date"] == "2026-11-10"

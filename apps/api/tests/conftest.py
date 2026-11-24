@@ -27,6 +27,7 @@ def settings() -> Settings:
         garmin_personal_api_key=None,
         anthropic_api_key=None,
         timezone="America/Sao_Paulo",
+        week_start_weekday=0,
     )
 
 

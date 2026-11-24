@@ -85,7 +85,7 @@ cd apps/api && uv run alembic revision --autogenerate -m "descricao"
 | `POST` | `/api/activities/upload` | Upload de arquivos `.fit`, `.gpx` ou `.tcx` (campo `files`) |
 | `GET` | `/api/activities?start=&end=` | Lista atividades realizadas |
 | `DELETE` | `/api/activities/{id}` | Remove uma atividade |
-| `GET` | `/api/weeks/{data}` | Planejado x realizado da semana (seg a dom) que contém a data |
+| `GET` | `/api/weeks/{data}` | Planejado x realizado da semana de treino que contém a data (começa no dia de `WEEK_START_WEEKDAY`; padrão terça) |
 
 ### Formato do treino planejado
 

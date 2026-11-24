@@ -16,9 +16,9 @@ from app.services.comparison import compare_workout
 from app.services.planned_workouts import list_planned_workouts
 
 
-def week_bounds(day: dt.date) -> tuple[dt.date, dt.date]:
-    """Semana de segunda a domingo que contém o dia informado."""
-    start = day - dt.timedelta(days=day.weekday())
+def week_bounds(day: dt.date, start_weekday: int = 0) -> tuple[dt.date, dt.date]:
+    """Semana de 7 dias, começando em start_weekday (0 = segunda), que contém o dia."""
+    start = day - dt.timedelta(days=(day.weekday() - start_weekday) % 7)
     return start, start + dt.timedelta(days=6)
 
 
@@ -54,9 +54,11 @@ def _match_day(
     return results, remaining
 
 
-def build_week_summary(db: Session, day: dt.date, today: dt.date | None = None) -> WeekSummary:
+def build_week_summary(
+    db: Session, day: dt.date, start_weekday: int = 0, today: dt.date | None = None
+) -> WeekSummary:
     today = today or dt.date.today()
-    start, end = week_bounds(day)
+    start, end = week_bounds(day, start_weekday)
     planned_by_day: dict[dt.date, list[PlannedWorkout]] = defaultdict(list)
     for workout in list_planned_workouts(db, start, end):
         planned_by_day[workout.scheduled_date].append(workout)

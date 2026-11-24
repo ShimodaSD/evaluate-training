@@ -21,9 +21,9 @@ def get_anthropic_client(settings: AppSettings) -> anthropic.Anthropic:
 
 
 @router.get("/{day}", response_model=WeekSummary)
-def week_summary(day: dt.date, db: DbSession) -> WeekSummary:
-    """Planejado x realizado da semana (segunda a domingo) que contém o dia informado."""
-    return build_week_summary(db, day)
+def week_summary(day: dt.date, db: DbSession, settings: AppSettings) -> WeekSummary:
+    """Planejado x realizado da semana de treino (início em WEEK_START_WEEKDAY) que contém o dia."""
+    return build_week_summary(db, day, settings.week_start_weekday)
 
 
 @router.post("/{day}/analysis", response_model=WeekAnalysis)
@@ -34,7 +34,7 @@ def week_analysis(
     client: Annotated[anthropic.Anthropic, Depends(get_anthropic_client)],
 ) -> WeekAnalysis:
     """Avaliação da semana escrita pelo Claude a partir do planejado x realizado."""
-    week = build_week_summary(db, day)
+    week = build_week_summary(db, day, settings.week_start_weekday)
     if not week.sports:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Não há treinos nesta semana")
     try:

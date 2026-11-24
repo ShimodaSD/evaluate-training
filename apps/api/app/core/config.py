@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import SecretStr
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://training:training@localhost:5432/training"
     cors_origins: list[str] = ["http://localhost:5173"]
     timezone: str = "America/Sao_Paulo"
+    # Dia em que a semana de treino começa (0 = segunda ... 6 = domingo).
+    week_start_weekday: int = Field(default=1, ge=0, le=6)
 
     # Garmin Connect Personal API: chave criada em
     # https://connect.garmin.com/app/settings/personalApiToken
