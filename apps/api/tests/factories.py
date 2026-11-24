@@ -20,6 +20,7 @@ def build_fit(
     laps: list[tuple[float, float, int | None]],
     *,
     include_session: bool = True,
+    sport: Sport = Sport.RUNNING,
 ) -> bytes:
     """Cria um FIT com as voltas (distância m, tempo s, FC média)."""
     file_id = FileIdMessage()
@@ -50,7 +51,7 @@ def build_fit(
         session = SessionMessage()
         session.start_time = _ms(start)
         session.timestamp = _ms(cursor)
-        session.sport = Sport.RUNNING
+        session.sport = sport
         session.total_distance = sum(lap[0] for lap in laps)
         session.total_timer_time = sum(lap[1] for lap in laps)
         session.total_elapsed_time = sum(lap[1] for lap in laps)

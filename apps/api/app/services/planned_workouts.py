@@ -18,6 +18,7 @@ def create_planned_workout(db: Session, data: PlannedWorkoutCreate) -> PlannedWo
         raw_text=data.text.strip(),
         structure=structure.model_dump(mode="json", exclude_computed_fields=True),
         total_distance_m=structure.total_distance_m,
+        sport=data.sport,
     )
     db.add(workout)
     db.commit()

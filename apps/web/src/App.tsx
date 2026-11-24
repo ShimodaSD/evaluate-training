@@ -36,7 +36,7 @@ function App() {
     <div className="app">
       <header className="topbar">
         <div>
-          <h1>Treinos de corrida</h1>
+          <h1>Treinos</h1>
           {week ? (
             <nav className="week-nav" aria-label="Semana">
               <button

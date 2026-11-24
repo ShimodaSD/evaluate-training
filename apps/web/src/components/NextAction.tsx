@@ -1,5 +1,5 @@
 import type { WeekSummary } from '../api/types'
-import { formatKm, formatWeekday } from '../lib/format'
+import { SPORT_LABEL, formatKm, formatWeekday } from '../lib/format'
 
 interface Props {
   week: WeekSummary
@@ -18,8 +18,9 @@ export function NextAction({ week, today, onUpload }: Props) {
       <section className="card action">
         <h2 className="card__label">Falta registrar</h2>
         <p>
-          O treino de <strong>{formatWeekday(missed.planned.scheduled_date)}</strong> (
-          {formatKm(missed.planned.total_distance_m)}) ainda não tem atividade. Se você correu,
+          O treino de {SPORT_LABEL[missed.planned.sport].toLowerCase()} de{' '}
+          <strong>{formatWeekday(missed.planned.scheduled_date)}</strong> (
+          {formatKm(missed.planned.total_distance_m)}) ainda não tem atividade. Se você treinou,
           envie o arquivo do relógio.
         </p>
         <button type="button" className="button" onClick={onUpload}>
@@ -35,7 +36,7 @@ export function NextAction({ week, today, onUpload }: Props) {
         <h2 className="card__label">{isToday ? 'Treino de hoje' : 'Próximo treino'}</h2>
         <p>
           <strong>{isToday ? 'Hoje' : formatWeekday(next.planned.scheduled_date)}</strong>:{' '}
-          {formatKm(next.planned.total_distance_m)}
+          {SPORT_LABEL[next.planned.sport]} · {formatKm(next.planned.total_distance_m)}
           {next.planned.title ? ` · ${next.planned.title}` : ''}
         </p>
       </section>

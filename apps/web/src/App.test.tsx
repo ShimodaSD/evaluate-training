@@ -31,7 +31,8 @@ describe('App', () => {
     renderWithSWR(<App />)
 
     expect(await screen.findByText('50%')).toBeInTheDocument()
-    expect(screen.getByText(/1 de 2 treinos feitos/)).toBeInTheDocument()
+    expect(screen.getByText(/1 de 2 treinos feitos · 43:20 de treino/)).toBeInTheDocument()
+    expect(screen.getByText('Corrida: 8 km de 16 km')).toBeInTheDocument()
     expect(screen.getByText('Falta registrar')).toBeInTheDocument()
     expect(screen.getByText('Cumprido')).toBeInTheDocument()
     expect(screen.getByText('Não feito')).toBeInTheDocument()

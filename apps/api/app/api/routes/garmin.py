@@ -17,7 +17,7 @@ def sync(
     start: dt.date | None = None,
     end: dt.date | None = None,
 ) -> UploadResult:
-    """Importa as corridas do Garmin Connect (padrão: últimos 7 dias)."""
+    """Importa corridas, pedais e natações do Garmin Connect (padrão: últimos 7 dias)."""
     if not settings.garmin_personal_api_key:
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST, "Configure GARMIN_PERSONAL_API_KEY no arquivo .env"

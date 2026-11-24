@@ -27,17 +27,18 @@ export const continuous: PlannedWorkout = {
     estimated_duration_s: [2552, 2680],
   },
   total_distance_m: 8000,
+  sport: 'run',
 }
 
 export function emptyWeek(): WeekSummary {
   return {
     week_start: WEEK_START,
     week_end: addDays(WEEK_START, 6),
-    planned_distance_m: 0,
-    actual_distance_m: 0,
     planned_workouts: 0,
     completed_workouts: 0,
     adherence_pct: null,
+    actual_duration_s: 0,
+    sports: [],
     days: Array.from({ length: 7 }, (_, i) => ({
       date: addDays(WEEK_START, i),
       workouts: [],
@@ -65,6 +66,7 @@ export function weekWithWorkouts(): WeekSummary {
           duration_s: 2600,
           avg_hr: 150,
           max_hr: 165,
+          sport: 'run',
           pace_s_per_km: 325,
         },
         comparison: {
@@ -97,10 +99,19 @@ export function weekWithWorkouts(): WeekSummary {
   week.days[3] = thursday
   return {
     ...week,
-    planned_distance_m: 16000,
-    actual_distance_m: 8000,
     planned_workouts: 2,
     completed_workouts: 1,
     adherence_pct: 50,
+    actual_duration_s: 2600,
+    sports: [
+      {
+        sport: 'run',
+        planned_distance_m: 16000,
+        actual_distance_m: 8000,
+        actual_duration_s: 2600,
+        planned_workouts: 2,
+        completed_workouts: 1,
+      },
+    ],
   }
 }

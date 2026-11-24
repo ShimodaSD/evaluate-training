@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import datetime as dt
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, computed_field
+
+# Pace sempre em s/km; o esporte só muda a exibição (km/h no ciclismo, /100 m na natação).
+Sport = Literal["run", "bike", "swim", "other"]
 
 
 def pace_from(distance_m: float | None, duration_s: float | None) -> float | None:
@@ -54,7 +58,7 @@ class ActivityOut(BaseModel):
     duration_s: float
     avg_hr: float | None
     max_hr: float | None
-    sport: str | None
+    sport: Sport
     laps: list[Lap]
 
     @computed_field  # type: ignore[prop-decorator]

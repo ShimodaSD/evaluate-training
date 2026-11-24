@@ -14,7 +14,8 @@ Formato esperado (um ou mais treinos, cada um começando em "1."):
 
 Cada passo tem um cabeçalho numerado (com indentação quando está dentro de
 um bloco "Repeat N times"), uma linha de alvo (distância ou duração e faixa
-de pace) e, opcionalmente, uma linha de zonas.
+de pace em min/km ou min/100m, ou de velocidade em km/h) e, opcionalmente,
+uma linha de zonas. Todo alvo é guardado como pace em s/km.
 """
 
 from __future__ import annotations
@@ -37,7 +38,12 @@ _HEADER_RE = re.compile(r"^(?P<indent>[ \t]*)(?P<num>\d+)\.\s+(?P<title>.+?)\s*$
 _REPEAT_RE = re.compile(
     r"^(?:repeat|repetir)\s+(?P<count>\d+)\s*(?:times|vezes|x)?$", re.IGNORECASE
 )
-_PACE = r"(?P<pmin>\d{1,2}:\d{2})(?:\s*-\s*(?P<pmax>\d{1,2}:\d{2}))?\s*min/km"
+_NUM = r"\d+(?:[.,]\d+)?"
+# Alvo em pace (min/km na corrida, min/100m na natação) ou velocidade (km/h no ciclismo).
+_PACE = (
+    r"(?:(?P<pmin>\d{1,2}:\d{2})(?:\s*-\s*(?P<pmax>\d{1,2}:\d{2}))?\s*min\s*/\s*(?P<punit>km|100\s*m)"
+    rf"|(?P<smin>{_NUM})(?:\s*-\s*(?P<smax>{_NUM}))?\s*km/h)"
+)
 _DISTANCE_TARGET_RE = re.compile(
     rf"^(?P<value>\d+(?:[.,]\d+)?)\s*(?P<unit>km|m)\s*(?:@\s*{_PACE})?\s*$", re.IGNORECASE
 )
@@ -105,12 +111,19 @@ class _Builder:
             raise PlanParseError(f"alvo não reconhecido: {line!r}", line_number)
 
         if match["pmin"]:
-            low = _clock_to_seconds(match["pmin"])
-            high = _clock_to_seconds(match["pmax"]) if match["pmax"] else low
-            if low == 0 and high == 0:
-                step.is_rest = True
-            else:
-                step.pace_min_s_per_km, step.pace_max_s_per_km = sorted((low, high))
+            factor = 1 if match["punit"].lower() == "km" else 10  # min/100m -> s/km
+            low = _clock_to_seconds(match["pmin"]) * factor
+            high = _clock_to_seconds(match["pmax"]) * factor if match["pmax"] else low
+        elif match["smin"]:
+            speeds = [float(v.replace(",", ".")) for v in (match["smin"], match["smax"]) if v]
+            # km/h -> s/km; velocidade 0 é pausa, como o pace 00:00
+            low, high = (3600 / v if v else 0 for v in (max(speeds), min(speeds)))
+        else:
+            return
+        if low == 0 and high == 0:
+            step.is_rest = True
+        else:
+            step.pace_min_s_per_km, step.pace_max_s_per_km = sorted((low, high))
 
     def add_zone(self, match: re.Match[str], line_number: int) -> None:
         step = self._require_step(line_number)

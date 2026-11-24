@@ -61,7 +61,7 @@ export function ActivityUpload({ onUploaded }: { onUploaded: () => void }) {
         disabled={uploading}
         onClick={() => void run(syncGarmin)}
       >
-        Sincronizar corridas do Garmin (últimos 7 dias)
+        Sincronizar atividades do Garmin (últimos 7 dias)
       </button>
       {error ? (
         <p className="alert alert--error" role="alert">

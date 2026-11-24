@@ -8,8 +8,8 @@ from collections import defaultdict
 from sqlalchemy.orm import Session
 
 from app.models import Activity, PlannedWorkout
-from app.schemas.activity import ActivityOut
-from app.schemas.comparison import DaySummary, PlannedVsDone, WeekSummary
+from app.schemas.activity import ActivityOut, Sport
+from app.schemas.comparison import DaySummary, PlannedVsDone, SportTotals, WeekSummary
 from app.schemas.plan import PlannedWorkoutOut, PlannedWorkoutStructure
 from app.services.activities import list_activities
 from app.services.comparison import compare_workout
@@ -30,8 +30,9 @@ def _match_day(
     # Treinos mais longos escolhem primeiro a atividade de distância mais próxima.
     for workout in sorted(planned, key=lambda w: -w.total_distance_m):
         planned_out = PlannedWorkoutOut.model_validate(workout)
-        if remaining:
-            activity = min(remaining, key=lambda a: abs(a.distance_m - workout.total_distance_m))
+        same_sport = [a for a in remaining if a.sport == workout.sport]
+        if same_sport:
+            activity = min(same_sport, key=lambda a: abs(a.distance_m - workout.total_distance_m))
             remaining.remove(activity)
             comparison = compare_workout(
                 PlannedWorkoutStructure.model_validate(workout.structure), activity
@@ -70,17 +71,41 @@ def build_week_summary(db: Session, day: dt.date, today: dt.date | None = None) 
         days.append(DaySummary(date=date, workouts=workouts, extra_activities=extras))
 
     all_workouts = [w for d in days for w in d.workouts]
+    all_activities = [w.activity for w in all_workouts if w.activity] + [
+        a for d in days for a in d.extra_activities
+    ]
     evaluated = [w.comparison.adherence_pct for w in all_workouts if w.comparison] + [
         0.0 for w in all_workouts if w.status == "missed"
     ]
     return WeekSummary(
         week_start=start,
         week_end=end,
-        planned_distance_m=sum(w.planned.total_distance_m for w in all_workouts),
-        actual_distance_m=sum(a.distance_m for d in days for a in d.extra_activities)
-        + sum(w.activity.distance_m for w in all_workouts if w.activity),
         planned_workouts=len(all_workouts),
         completed_workouts=sum(1 for w in all_workouts if w.activity),
         adherence_pct=round(sum(evaluated) / len(evaluated), 1) if evaluated else None,
+        actual_duration_s=sum(a.duration_s for a in all_activities),
+        sports=_sport_totals(all_workouts, all_activities),
         days=days,
     )
+
+
+def _sport_totals(
+    workouts: list[PlannedVsDone], activities: list[ActivityOut]
+) -> list[SportTotals]:
+    sports: list[Sport] = ["run", "bike", "swim", "other"]
+    totals = []
+    for sport in sports:
+        planned = [w for w in workouts if w.planned.sport == sport]
+        done = [a for a in activities if a.sport == sport]
+        if planned or done:
+            totals.append(
+                SportTotals(
+                    sport=sport,
+                    planned_distance_m=sum(w.planned.total_distance_m for w in planned),
+                    actual_distance_m=sum(a.distance_m for a in done),
+                    actual_duration_s=sum(a.duration_s for a in done),
+                    planned_workouts=len(planned),
+                    completed_workouts=sum(1 for w in planned if w.activity),
+                )
+            )
+    return totals

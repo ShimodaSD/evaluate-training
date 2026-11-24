@@ -15,22 +15,25 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Protocol
 
-from app.schemas.activity import Lap, pace_from
+from app.schemas.activity import Lap, Sport, pace_from
 from app.schemas.comparison import PaceStatus, StepComparison, WorkoutComparison
 from app.schemas.plan import PlannedStep, PlannedWorkoutStructure
 
 PACE_TOLERANCE_S = 5
+# Em s/km: 3 s/100m na natação; no ciclismo 5 s/km ≈ 1,3 km/h a 30 km/h.
+SPORT_TOLERANCE_S: dict[str, int] = {"swim": 30}
 DONE_THRESHOLD_PCT = 80.0
 
 
 class ActivityLike(Protocol):
     distance_m: float
     duration_s: float
+    sport: Sport
     laps: Sequence[Lap]
 
 
 def classify_pace(
-    pace: float | None, low: int | None, high: int | None, tolerance: int = PACE_TOLERANCE_S
+    pace: float | None, low: float | None, high: float | None, tolerance: int = PACE_TOLERANCE_S
 ) -> PaceStatus | None:
     """Classifica o pace realizado em relação à faixa alvo (low = mais rápido)."""
     if pace is None or low is None:
@@ -53,7 +56,9 @@ def _aligned_laps(steps: list[PlannedStep], laps: Sequence[Lap]) -> Sequence[Lap
     return None
 
 
-def _compare_steps(steps: list[PlannedStep], laps: Sequence[Lap]) -> list[StepComparison]:
+def _compare_steps(
+    steps: list[PlannedStep], laps: Sequence[Lap], tolerance: int
+) -> list[StepComparison]:
     result = []
     for index, (step, lap) in enumerate(zip(steps, laps, strict=True)):
         pace = pace_from(lap.distance_m, lap.duration_s)
@@ -73,7 +78,7 @@ def _compare_steps(steps: list[PlannedStep], laps: Sequence[Lap]) -> list[StepCo
                 actual_avg_hr=lap.avg_hr,
                 pace_status=None
                 if step.is_rest
-                else classify_pace(pace, step.pace_min_s_per_km, step.pace_max_s_per_km),
+                else classify_pace(pace, step.pace_min_s_per_km, step.pace_max_s_per_km, tolerance),
             )
         )
     return result
@@ -84,6 +89,7 @@ def compare_workout(plan: PlannedWorkoutStructure, activity: ActivityLike) -> Wo
     planned_distance = plan.total_distance_m
     distance_ratio = activity.distance_m / planned_distance if planned_distance else None
     overall_pace = pace_from(activity.distance_m, activity.duration_s)
+    tolerance = SPORT_TOLERANCE_S.get(activity.sport, PACE_TOLERANCE_S)
 
     step_comparisons: list[StepComparison] | None = None
     pace_status: PaceStatus | None = None
@@ -91,7 +97,7 @@ def compare_workout(plan: PlannedWorkoutStructure, activity: ActivityLike) -> Wo
 
     laps = _aligned_laps(steps, activity.laps)
     if laps is not None:
-        step_comparisons = _compare_steps(steps, laps)
+        step_comparisons = _compare_steps(steps, laps, tolerance)
         evaluated = [s for s in step_comparisons if s.pace_status is not None]
         if evaluated:
             pace_ratio = sum(s.pace_status == "in_range" for s in evaluated) / len(evaluated)
@@ -100,7 +106,7 @@ def compare_workout(plan: PlannedWorkoutStructure, activity: ActivityLike) -> Wo
         if len(running) == 1:
             target = running[0]
             pace_status = classify_pace(
-                overall_pace, target.pace_min_s_per_km, target.pace_max_s_per_km
+                overall_pace, target.pace_min_s_per_km, target.pace_max_s_per_km, tolerance
             )
             if pace_status is not None:
                 pace_ratio = 1.0 if pace_status == "in_range" else 0.0

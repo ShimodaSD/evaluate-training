@@ -35,7 +35,7 @@ def week_analysis(
 ) -> WeekAnalysis:
     """Avaliação da semana escrita pelo Claude a partir do planejado x realizado."""
     week = build_week_summary(db, day)
-    if week.planned_workouts == 0 and week.actual_distance_m == 0:
+    if not week.sports:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Não há treinos nesta semana")
     try:
         return WeekAnalysis(analysis=analyze_week(client, settings.anthropic_model, week))

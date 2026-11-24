@@ -1,5 +1,5 @@
 import type { DaySummary, PlannedVsDone } from '../api/types'
-import { formatKm, formatPace, formatWeekday } from '../lib/format'
+import { SPORT_LABEL, formatKm, formatPace, formatWeekday } from '../lib/format'
 import { StatusBadge } from './StatusBadge'
 import { StepTable } from './StepTable'
 
@@ -16,12 +16,13 @@ function WorkoutItem({ item, onDelete }: { item: PlannedVsDone; onDelete: (id: n
       <details>
         <summary>
           <span className="workout__title">
+            <span className="muted">{SPORT_LABEL[planned.sport]} · </span>
             {planned.title ?? `${formatKm(planned.total_distance_m)} planejado`}
           </span>
           <StatusBadge status={item.status} />
           <span className="workout__numbers">
             {activity
-              ? `${formatKm(activity.distance_m)} · ${formatPace(activity.pace_s_per_km)}`
+              ? `${formatKm(activity.distance_m)} · ${formatPace(activity.pace_s_per_km, activity.sport)}`
               : formatKm(planned.total_distance_m)}
           </span>
           {comparison ? (
@@ -30,7 +31,7 @@ function WorkoutItem({ item, onDelete }: { item: PlannedVsDone; onDelete: (id: n
         </summary>
         <div className="workout__body">
           {comparison?.steps ? (
-            <StepTable steps={comparison.steps} />
+            <StepTable steps={comparison.steps} sport={planned.sport} />
           ) : (
             <pre className="workout__plan">{planned.raw_text}</pre>
           )}
@@ -66,9 +67,11 @@ export function DayList({ days, today, onDelete }: Props) {
                 ))}
                 {day.extra_activities.map((a) => (
                   <li key={a.id} className="workout workout--extra">
-                    <span className="workout__title">Atividade extra</span>
+                    <span className="workout__title">
+                      Atividade extra <span className="muted">· {SPORT_LABEL[a.sport]}</span>
+                    </span>
                     <span className="workout__numbers">
-                      {formatKm(a.distance_m)} · {formatPace(a.pace_s_per_km)}
+                      {formatKm(a.distance_m)} · {formatPace(a.pace_s_per_km, a.sport)}
                     </span>
                   </li>
                 ))}

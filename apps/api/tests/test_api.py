@@ -1,6 +1,7 @@
 import datetime as dt
 
 from fastapi.testclient import TestClient
+from fit_tool.profile.profile_type import Sport
 
 from tests.factories import build_fit, build_tcx
 
@@ -122,8 +123,17 @@ def test_resumo_semanal_planejado_x_realizado(client: TestClient, week_text: str
     assert week["week_end"] == "2026-11-22"
     assert week["planned_workouts"] == 3
     assert week["completed_workouts"] == 1
-    assert week["planned_distance_m"] == 27000
-    assert week["actual_distance_m"] == 11000
+    assert week["sports"] == [
+        {
+            "sport": "run",
+            "planned_distance_m": 27000,
+            "actual_distance_m": 11000,
+            "actual_duration_s": 8 * 325 + 1080,
+            "planned_workouts": 3,
+            "completed_workouts": 1,
+        }
+    ]
+    assert week["actual_duration_s"] == 8 * 325 + 1080
 
     days = {d["date"]: d for d in week["days"]}
     tuesday = days["2026-11-17"]["workouts"][0]
@@ -132,3 +142,33 @@ def test_resumo_semanal_planejado_x_realizado(client: TestClient, week_text: str
     assert len(days["2026-11-18"]["extra_activities"]) == 1
     # Quinta e sábado ficam "missed" ou "planned" conforme a data atual.
     assert days["2026-11-19"]["workouts"][0]["status"] in {"missed", "planned"}
+
+
+def test_semana_casa_cada_treino_com_atividade_do_mesmo_esporte(client: TestClient) -> None:
+    bike_text = "1. Endurance\n1:00:00 @ 28-32 km/h"
+    client.post(
+        "/api/planned-workouts",
+        json={"scheduled_date": "2026-11-17", "sport": "bike", "text": bike_text},
+    )
+    client.post(
+        "/api/planned-workouts", json={"scheduled_date": "2026-11-17", "text": _continuous_text()}
+    )
+    # O pedal tem distância mais próxima dos 8 km da corrida, mas só pode casar com o plano de bike.
+    bike = build_fit(
+        dt.datetime(2026, 11, 17, 18, 0, tzinfo=dt.UTC), [(9000, 1080, 130)], sport=Sport.CYCLING
+    )
+    run = build_fit(dt.datetime(2026, 11, 17, 9, 0, tzinfo=dt.UTC), [(8000, 2600, 150)])
+    client.post(
+        "/api/activities/upload",
+        files=[("files", ("pedal.fit", bike)), ("files", ("run.fit", run))],
+    )
+
+    week = client.get("/api/weeks/2026-11-17").json()
+
+    tuesday = next(d for d in week["days"] if d["date"] == "2026-11-17")
+    by_sport = {w["planned"]["sport"]: w for w in tuesday["workouts"]}
+    assert by_sport["bike"]["activity"]["file_name"] == "pedal.fit"
+    assert by_sport["bike"]["comparison"]["pace_status"] == "in_range"  # 30 km/h
+    assert by_sport["run"]["activity"]["file_name"] == "run.fit"
+    assert [s["sport"] for s in week["sports"]] == ["run", "bike"]
+    assert week["actual_duration_s"] == 2600 + 1080

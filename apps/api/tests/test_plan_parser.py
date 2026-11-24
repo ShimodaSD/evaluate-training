@@ -83,3 +83,21 @@ def test_aceita_metros_e_virgula() -> None:
 def test_erros_informam_o_problema(text: str, message: str) -> None:
     with pytest.raises(PlanParseError, match=message):
         parse_workouts(text)
+
+
+def test_alvo_de_velocidade_do_ciclismo_vira_pace() -> None:
+    (step,) = parse_workout("1. Endurance — Z2\n1:00:00 @ 28-32,5 km/h").blocks
+
+    assert isinstance(step, PlannedStep)
+    assert step.duration_s == 3600
+    assert step.pace_min_s_per_km == pytest.approx(3600 / 32.5)
+    assert step.pace_max_s_per_km == pytest.approx(3600 / 28)
+
+
+def test_alvo_de_pace_da_natacao_por_100m() -> None:
+    workout = parse_workout("1. Série\n100 m @ 01:45-01:50 min/100m\n2. Pausa\n0:20 @ 0 km/h")
+
+    swim, rest = workout.blocks
+    assert isinstance(swim, PlannedStep) and isinstance(rest, PlannedStep)
+    assert (swim.distance_m, swim.pace_min_s_per_km, swim.pace_max_s_per_km) == (100, 1050, 1100)
+    assert rest.is_rest

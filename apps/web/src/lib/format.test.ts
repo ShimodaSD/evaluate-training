@@ -17,6 +17,13 @@ describe('format', () => {
     expect(formatPaceRange(360, 360)).toBe('6:00/km')
   })
 
+  it('mostra o pace como cada esporte usa', () => {
+    expect(formatPace(120, 'bike')).toBe('30 km/h')
+    expect(formatPaceRange(3600 / 32.5, 3600 / 28, 'bike')).toBe('28–32,5 km/h')
+    expect(formatPace(1050, 'swim')).toBe('1:45/100m')
+    expect(formatPaceRange(1050, 1100, 'swim')).toBe('1:45–1:50/100m')
+  })
+
   it('soma dias atravessando o mês', () => {
     expect(addDays('2026-11-30', 1)).toBe('2026-12-01')
     expect(addDays('2026-11-16', -7)).toBe('2026-11-09')

@@ -1,7 +1,8 @@
 # evaluate-training
 
-Dashboard para avaliar treinos de corrida, comparando o treino planejado da semana
-(texto copiado do TrainingPeaks) com o que foi realizado (upload de arquivos e API Garmin).
+Dashboard para avaliar treinos de corrida, ciclismo e natação, comparando o treino planejado
+da semana (texto copiado do TrainingPeaks) com o que foi realizado (upload de arquivos e API
+Garmin).
 
 ## Estrutura
 
@@ -23,7 +24,7 @@ Dashboard para avaliar treinos de corrida, comparando o treino planejado da sema
 │           ├── api/         # Cliente HTTP e tipos da API
 │           ├── components/  # Painel, gráfico, formulários (com testes *.test.tsx)
 │           ├── hooks/       # Hooks de dados (SWR)
-│           ├── lib/         # Formatação de km, pace e datas
+│           ├── lib/         # Formatação de km, pace/velocidade por esporte e datas
 │           └── test/        # Setup, fixtures e helpers do Vitest
 ├── docker-compose.yml       # Postgres + API + Web
 ├── Makefile                 # Atalhos de desenvolvimento
@@ -78,7 +79,7 @@ cd apps/api && uv run alembic revision --autogenerate -m "descricao"
 | Método | Rota | Descrição |
 | --- | --- | --- |
 | `POST` | `/api/planned-workouts/preview` | Interpreta o texto do TrainingPeaks sem salvar |
-| `POST` | `/api/planned-workouts` | Salva um treino planejado (`scheduled_date`, `text`, `title`) |
+| `POST` | `/api/planned-workouts` | Salva um treino planejado (`scheduled_date`, `text`, `title`, `sport`) |
 | `GET` | `/api/planned-workouts?start=&end=` | Lista treinos planejados |
 | `DELETE` | `/api/planned-workouts/{id}` | Remove um treino planejado |
 | `POST` | `/api/activities/upload` | Upload de arquivos `.fit`, `.gpx` ou `.tcx` (campo `files`) |
@@ -102,13 +103,27 @@ Zona 5-Zona 6
 2:30 @ 00:00 min/km
 ```
 
+O alvo pode ser pace (`min/km` na corrida, `min/100m` na natação) ou velocidade (`km/h` no
+ciclismo), sobre distância (`2.00 km`, `100 m`) ou duração (`1:00:00`). Ao salvar, escolha o
+esporte (`run`, `bike` ou `swim`; padrão `run`).
+
+### Esportes
+
+- Todo alvo é guardado como pace em s/km; o esporte só muda a exibição (min/km, km/h ou
+  min/100m). Para um esporte novo basta um rótulo e uma regra de exibição.
+- O esporte da atividade vem do arquivo ou da Garmin (`running`, `cycling`, `lap_swimming`...)
+  e é normalizado para `run`, `bike`, `swim` ou `other`. GPX sem tipo conta como corrida.
+- Cada treino planejado só casa com uma atividade do mesmo esporte no mesmo dia.
+- A carga combinada da semana é o tempo total; distâncias aparecem por esporte.
+
 ### Como a aderência é calculada
 
 - Quando a atividade tem uma volta por passo (treino estruturado executado no relógio),
   cada passo é comparado com sua volta. Uma volta extra no final é ignorada.
 - Caso contrário, compara-se o total; o pace médio só é avaliado em treinos com um
   único passo de corrida (rodagem contínua).
-- Pace dentro da faixa alvo com tolerância de 5 s/km. Passos de pausa não contam.
+- Pace dentro da faixa alvo com tolerância de 5 s/km (3 s/100m na natação). Passos de pausa
+  não contam.
 - Aderência = média entre a nota de distância (`1 - |realizado/planejado - 1|`) e a
   fração de passos no pace alvo. A partir de 80% o treino conta como cumprido.
 
@@ -125,10 +140,11 @@ Usa a [Garmin Connect Personal API](https://developer.garmin.com/gc-developer-pr
 1. Crie uma chave em https://connect.garmin.com/app/settings/personalApiToken
    (ela aparece uma única vez; validade de 30 dias a 1 ano).
 2. Coloque no `.env`: `GARMIN_PERSONAL_API_KEY=sua-chave`.
-3. No painel, em **Enviar atividade**, clique em **Sincronizar corridas do Garmin**
+3. No painel, em **Enviar atividade**, clique em **Sincronizar atividades do Garmin**
    (ou `POST /api/garmin/sync?start=AAAA-MM-DD&end=AAAA-MM-DD`; padrão: últimos 7 dias).
 
-A sincronização busca as corridas do período, baixa o arquivo FIT original de cada uma
+A sincronização busca as corridas, pedais e natações do período (outros tipos, como
+musculação, são ignorados), baixa o arquivo FIT original de cada uma
 (com as voltas, para a comparação passo a passo) e ignora atividades já importadas,
 inclusive as enviadas antes por upload de arquivo. `/api/health` informa em
 `garmin_configured` se a chave foi definida.

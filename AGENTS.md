@@ -1,7 +1,7 @@
 # Instruções para agentes
 
-Dashboard de treinos de corrida: compara o treino planejado (texto do TrainingPeaks)
-com o realizado (arquivos FIT/GPX/TCX e API Garmin). Monorepo com `apps/api`
+Dashboard de treinos de corrida, ciclismo e natação: compara o treino planejado (texto do
+TrainingPeaks) com o realizado (arquivos FIT/GPX/TCX e API Garmin). Monorepo com `apps/api`
 (FastAPI) e `apps/web` (React + Vite). Veja o README para rodar o projeto.
 
 ## Fluxo de git (gitflow)
