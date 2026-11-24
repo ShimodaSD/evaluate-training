@@ -1,5 +1,5 @@
 import type { DaySummary, PlannedVsDone } from '../api/types'
-import { SPORT_LABEL, formatKm, formatPace, formatWeekday } from '../lib/format'
+import { SPORT_LABEL, formatKm, formatPace, formatPower, formatWeekday } from '../lib/format'
 import { StatusBadge } from './StatusBadge'
 import { StepTable } from './StepTable'
 
@@ -22,7 +22,7 @@ function WorkoutItem({ item, onDelete }: { item: PlannedVsDone; onDelete: (id: n
           <StatusBadge status={item.status} />
           <span className="workout__numbers">
             {activity
-              ? `${formatKm(activity.distance_m)} · ${formatPace(activity.pace_s_per_km, activity.sport)}`
+              ? `${formatKm(activity.distance_m)} · ${formatPace(activity.pace_s_per_km, activity.sport)}${activity.avg_power_w != null ? ` · ${formatPower(activity.avg_power_w)}` : ''}`
               : formatKm(planned.total_distance_m)}
           </span>
           {comparison ? (

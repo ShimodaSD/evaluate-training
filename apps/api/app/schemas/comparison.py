@@ -21,10 +21,14 @@ class StepComparison(BaseModel):
     planned_duration_s: int | None
     target_pace_min_s_per_km: float | None
     target_pace_max_s_per_km: float | None
+    target_power_min_w: float | None
+    target_power_max_w: float | None
     actual_distance_m: float
     actual_duration_s: float
     actual_pace_s_per_km: float | None
     actual_avg_hr: float | None
+    actual_avg_power_w: float | None
+    # Status do alvo do passo: potência quando há alvo em W, senão pace ("fast" = acima do alvo).
     pace_status: PaceStatus | None
 
 

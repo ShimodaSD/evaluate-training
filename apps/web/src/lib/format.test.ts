@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addDays, formatClock, formatKm, formatPace, formatPaceRange } from './format'
+import { addDays, formatClock, formatKm, formatPace, formatPaceRange, formatPower } from './format'
 
 describe('format', () => {
   it('formata distâncias em km', () => {
@@ -22,6 +22,12 @@ describe('format', () => {
     expect(formatPaceRange(3600 / 32.5, 3600 / 28, 'bike')).toBe('28–32,5 km/h')
     expect(formatPace(1050, 'swim')).toBe('1:45/100m')
     expect(formatPaceRange(1050, 1100, 'swim')).toBe('1:45–1:50/100m')
+  })
+
+  it('formata potência', () => {
+    expect(formatPower(200, 215)).toBe('200–215 W')
+    expect(formatPower(121.6)).toBe('122 W')
+    expect(formatPower(null)).toBe('—')
   })
 
   it('soma dias atravessando o mês', () => {

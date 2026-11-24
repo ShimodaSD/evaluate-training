@@ -172,3 +172,30 @@ def test_semana_casa_cada_treino_com_atividade_do_mesmo_esporte(client: TestClie
     assert by_sport["run"]["activity"]["file_name"] == "run.fit"
     assert [s["sport"] for s in week["sports"]] == ["run", "bike"]
     assert week["actual_duration_s"] == 2600 + 1080
+
+
+def test_treino_no_rolo_avaliado_pela_potencia(client: TestClient) -> None:
+    text = "1. Aquecimento\n10:00 @ 100-130 W\n2. Sweet spot\n20:00 @ 200-215 W"
+    client.post(
+        "/api/planned-workouts",
+        json={"scheduled_date": "2026-11-22", "sport": "bike", "text": text},
+    )
+    # Rolo: velocidade virtual; o segundo bloco ficou 20 W abaixo do alvo.
+    ride = build_fit(
+        dt.datetime(2026, 11, 22, 21, 0, tzinfo=dt.UTC),
+        [(4000, 600, 115), (8000, 1200, 135)],
+        sport=Sport.CYCLING,
+        powers=[120, 180],
+    )
+    client.post("/api/activities/upload", files=[("files", ("rolo.fit", ride))])
+
+    week = client.get("/api/weeks/2026-11-22").json()
+
+    sunday = next(d for d in week["days"] if d["date"] == "2026-11-22")
+    (workout,) = sunday["workouts"]
+    assert workout["activity"]["avg_power_w"] == 150
+    steps = workout["comparison"]["steps"]
+    assert [s["actual_avg_power_w"] for s in steps] == [120, 180]
+    assert [s["pace_status"] for s in steps] == ["in_range", "slow"]
+    assert workout["comparison"]["distance_ratio"] is None  # só duração: nota só da potência
+    assert workout["comparison"]["adherence_pct"] == 50

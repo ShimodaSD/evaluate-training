@@ -14,7 +14,7 @@ Formato esperado (um ou mais treinos, cada um começando em "1."):
 
 Cada passo tem um cabeçalho numerado (com indentação quando está dentro de
 um bloco "Repeat N times"), uma linha de alvo (distância ou duração e faixa
-de pace em min/km ou min/100m, ou de velocidade em km/h) e, opcionalmente,
+de pace em min/km ou min/100m, de velocidade em km/h ou de potência em W) e, opcionalmente,
 uma linha de zonas. Todo alvo é guardado como pace em s/km.
 """
 
@@ -42,7 +42,8 @@ _NUM = r"\d+(?:[.,]\d+)?"
 # Alvo em pace (min/km na corrida, min/100m na natação) ou velocidade (km/h no ciclismo).
 _PACE = (
     r"(?:(?P<pmin>\d{1,2}:\d{2})(?:\s*-\s*(?P<pmax>\d{1,2}:\d{2}))?\s*min\s*/\s*(?P<punit>km|100\s*m)"
-    rf"|(?P<smin>{_NUM})(?:\s*-\s*(?P<smax>{_NUM}))?\s*km/h)"
+    rf"|(?P<smin>{_NUM})(?:\s*-\s*(?P<smax>{_NUM}))?\s*km/h"
+    r"|(?P<wmin>\d+)(?:\s*-\s*(?P<wmax>\d+))?\s*w)"
 )
 _DISTANCE_TARGET_RE = re.compile(
     rf"^(?P<value>\d+(?:[.,]\d+)?)\s*(?P<unit>km|m)\s*(?:@\s*{_PACE})?\s*$", re.IGNORECASE
@@ -118,6 +119,13 @@ class _Builder:
             speeds = [float(v.replace(",", ".")) for v in (match["smin"], match["smax"]) if v]
             # km/h -> s/km; velocidade 0 é pausa, como o pace 00:00
             low, high = (3600 / v if v else 0 for v in (max(speeds), min(speeds)))
+        elif match["wmin"]:
+            watts = sorted(int(v) for v in (match["wmin"], match["wmax"]) if v)
+            if watts[-1] == 0:
+                step.is_rest = True
+            else:
+                step.power_min_w, step.power_max_w = watts[0], watts[-1]
+            return
         else:
             return
         if low == 0 and high == 0:

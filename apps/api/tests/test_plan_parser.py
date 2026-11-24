@@ -101,3 +101,13 @@ def test_alvo_de_pace_da_natacao_por_100m() -> None:
     assert isinstance(swim, PlannedStep) and isinstance(rest, PlannedStep)
     assert (swim.distance_m, swim.pace_min_s_per_km, swim.pace_max_s_per_km) == (100, 1050, 1100)
     assert rest.is_rest
+
+
+def test_alvo_de_potencia_em_watts() -> None:
+    workout = parse_workout("1. Sweet spot — Z3\n10:00 @ 200-215 W\n2. Solto\n5:00 @ 0 W")
+
+    work, rest = workout.blocks
+    assert isinstance(work, PlannedStep) and isinstance(rest, PlannedStep)
+    assert (work.power_min_w, work.power_max_w) == (200, 215)
+    assert work.pace_min_s_per_km is None
+    assert rest.is_rest

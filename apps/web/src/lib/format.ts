@@ -41,6 +41,11 @@ export function formatPaceRange(min: number | null, max: number | null, sport: S
   return `${formatClock(min)}–${formatClock(max)}/km`
 }
 
+export function formatPower(min: number | null, max: number | null = min): string {
+  if (min == null) return '—'
+  return max == null || max === min ? `${Math.round(min)} W` : `${min}–${max} W`
+}
+
 /** Datas ISO (AAAA-MM-DD) tratadas como datas locais, sem fuso. */
 export function parseDate(iso: string): Date {
   const [y, m, d] = iso.split('-').map(Number)

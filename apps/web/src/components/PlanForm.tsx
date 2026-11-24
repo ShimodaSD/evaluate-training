@@ -13,8 +13,10 @@ const SPORTS: Sport[] = ['run', 'bike', 'swim']
 const PLACEHOLDER: Record<Sport, string> = {
   bike: `1. Aquecimento — Z1
 15:00 @ 24-27 km/h
-2. Endurance — Z2
-1:00:00 @ 28-32 km/h`,
+2. Sweet spot — Z3 (no rolo, use watts)
+20:00 @ 200-215 W
+3. Endurance — Z2
+30:00 @ 28-32 km/h`,
   swim: `1. Aquecimento
 200 m @ 02:10-02:20 min/100m
 2. Repeat 4 times

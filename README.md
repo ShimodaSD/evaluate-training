@@ -103,9 +103,10 @@ Zona 5-Zona 6
 2:30 @ 00:00 min/km
 ```
 
-O alvo pode ser pace (`min/km` na corrida, `min/100m` na natação) ou velocidade (`km/h` no
-ciclismo), sobre distância (`2.00 km`, `100 m`) ou duração (`1:00:00`). Ao salvar, escolha o
-esporte (`run`, `bike` ou `swim`; padrão `run`).
+O alvo pode ser pace (`min/km` na corrida, `min/100m` na natação), velocidade (`km/h`) ou
+potência (`150-180 W`, ideal no rolo, onde a velocidade é virtual), sobre distância
+(`2.00 km`, `100 m`) ou duração (`1:00:00`). Ao salvar, escolha o esporte (`run`, `bike` ou
+`swim`; padrão `run`). Treinos só por duração não têm nota de distância.
 
 ### Esportes
 
@@ -124,6 +125,7 @@ esporte (`run`, `bike` ou `swim`; padrão `run`).
   único passo de corrida (rodagem contínua).
 - Pace dentro da faixa alvo com tolerância de 5 s/km (3 s/100m na natação). Passos de pausa
   não contam.
+- Com alvo em W (ciclismo), vale a potência média com tolerância de 5 W em vez do pace.
 - Aderência = média entre a nota de distância (`1 - |realizado/planejado - 1|`) e a
   fração de passos no pace alvo. A partir de 80% o treino conta como cumprido.
 

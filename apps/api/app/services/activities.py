@@ -50,6 +50,7 @@ def save_activity(
         duration_s=parsed.duration_s,
         avg_hr=parsed.avg_hr,
         max_hr=parsed.max_hr,
+        avg_power_w=parsed.avg_power_w,
         sport=normalize_sport(parsed.sport),
         laps=[lap.model_dump(mode="json", exclude_computed_fields=True) for lap in parsed.laps],
     )

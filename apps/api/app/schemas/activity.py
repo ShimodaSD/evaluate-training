@@ -22,6 +22,7 @@ class Lap(BaseModel):
     duration_s: float
     avg_hr: float | None = None
     max_hr: float | None = None
+    avg_power_w: float | None = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -37,6 +38,7 @@ class ParsedActivity(BaseModel):
     duration_s: float
     avg_hr: float | None = None
     max_hr: float | None = None
+    avg_power_w: float | None = None
     sport: str | None = None
     laps: list[Lap] = []
 
@@ -58,6 +60,7 @@ class ActivityOut(BaseModel):
     duration_s: float
     avg_hr: float | None
     max_hr: float | None
+    avg_power_w: float | None
     sport: Sport
     laps: list[Lap]
 

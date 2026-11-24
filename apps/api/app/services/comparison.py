@@ -20,6 +20,7 @@ from app.schemas.comparison import PaceStatus, StepComparison, WorkoutComparison
 from app.schemas.plan import PlannedStep, PlannedWorkoutStructure
 
 PACE_TOLERANCE_S = 5
+POWER_TOLERANCE_W = 5
 # Em s/km: 3 s/100m na natação; no ciclismo 5 s/km ≈ 1,3 km/h a 30 km/h.
 SPORT_TOLERANCE_S: dict[str, int] = {"swim": 30}
 DONE_THRESHOLD_PCT = 80.0
@@ -28,6 +29,7 @@ DONE_THRESHOLD_PCT = 80.0
 class ActivityLike(Protocol):
     distance_m: float
     duration_s: float
+    avg_power_w: float | None
     sport: Sport
     laps: Sequence[Lap]
 
@@ -44,6 +46,28 @@ def classify_pace(
     if pace > high + tolerance:
         return "slow"
     return "in_range"
+
+
+def classify_power(power: float | None, low: float | None, high: float | None) -> PaceStatus | None:
+    """Potência em relação à faixa alvo; "fast" é acima da faixa, "slow" abaixo."""
+    if power is None or low is None:
+        return None
+    high = high if high is not None else low
+    if power > high + POWER_TOLERANCE_W:
+        return "fast"
+    if power < low - POWER_TOLERANCE_W:
+        return "slow"
+    return "in_range"
+
+
+def _target_status(
+    step: PlannedStep, pace: float | None, power: float | None, tolerance: int
+) -> PaceStatus | None:
+    if step.is_rest:
+        return None
+    if step.power_min_w is not None:
+        return classify_power(power, step.power_min_w, step.power_max_w)
+    return classify_pace(pace, step.pace_min_s_per_km, step.pace_max_s_per_km, tolerance)
 
 
 def _aligned_laps(steps: list[PlannedStep], laps: Sequence[Lap]) -> Sequence[Lap] | None:
@@ -72,13 +96,14 @@ def _compare_steps(
                 planned_duration_s=step.duration_s,
                 target_pace_min_s_per_km=step.pace_min_s_per_km,
                 target_pace_max_s_per_km=step.pace_max_s_per_km,
+                target_power_min_w=step.power_min_w,
+                target_power_max_w=step.power_max_w,
                 actual_distance_m=lap.distance_m,
                 actual_duration_s=lap.duration_s,
                 actual_pace_s_per_km=pace,
                 actual_avg_hr=lap.avg_hr,
-                pace_status=None
-                if step.is_rest
-                else classify_pace(pace, step.pace_min_s_per_km, step.pace_max_s_per_km, tolerance),
+                actual_avg_power_w=lap.avg_power_w,
+                pace_status=_target_status(step, pace, lap.avg_power_w, tolerance),
             )
         )
     return result
@@ -104,10 +129,7 @@ def compare_workout(plan: PlannedWorkoutStructure, activity: ActivityLike) -> Wo
     else:
         running = [s for s in steps if not s.is_rest]
         if len(running) == 1:
-            target = running[0]
-            pace_status = classify_pace(
-                overall_pace, target.pace_min_s_per_km, target.pace_max_s_per_km, tolerance
-            )
+            pace_status = _target_status(running[0], overall_pace, activity.avg_power_w, tolerance)
             if pace_status is not None:
                 pace_ratio = 1.0 if pace_status == "in_range" else 0.0
 

@@ -36,6 +36,7 @@ class Activity(Base):
     duration_s: Mapped[float] = mapped_column(Float)
     avg_hr: Mapped[float | None] = mapped_column(Float)
     max_hr: Mapped[float | None] = mapped_column(Float)
+    avg_power_w: Mapped[float | None] = mapped_column(Float)
     sport: Mapped[str] = mapped_column(String(50), default="run", server_default="run")
     laps: Mapped[list] = mapped_column(JSON, default=list)
     created_at: Mapped[dt.datetime] = mapped_column(

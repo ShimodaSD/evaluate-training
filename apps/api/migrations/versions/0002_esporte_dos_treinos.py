@@ -1,4 +1,4 @@
-"""esporte dos treinos planejados e atividades
+"""esporte dos treinos planejados e atividades, potência média
 
 Revision ID: 3f1a9c2b7d40
 Revises: 7c784e2845fe
@@ -20,6 +20,7 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     """Upgrade schema."""
+    op.add_column("activities", sa.Column("avg_power_w", sa.Float(), nullable=True))
     op.add_column(
         "planned_workouts",
         sa.Column("sport", sa.String(length=10), server_default="run", nullable=False),
@@ -50,3 +51,4 @@ def downgrade() -> None:
             "sport", existing_type=sa.String(length=50), server_default=None, nullable=True
         )
     op.drop_column("planned_workouts", "sport")
+    op.drop_column("activities", "avg_power_w")

@@ -18,6 +18,8 @@ class PlannedStep(BaseModel):
     duration_s: int | None = None
     pace_min_s_per_km: float | None = Field(default=None, description="Pace mais rápido da faixa")
     pace_max_s_per_km: float | None = Field(default=None, description="Pace mais lento da faixa")
+    power_min_w: float | None = None
+    power_max_w: float | None = None
     zone_min: int | None = None
     zone_max: int | None = None
     is_rest: bool = False
