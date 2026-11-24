@@ -20,6 +20,8 @@ def build_fit(
     laps: list[tuple[float, float, int | None]],
     *,
     include_session: bool = True,
+    sport: Sport = Sport.RUNNING,
+    powers: list[int] | None = None,
 ) -> bytes:
     """Cria um FIT com as voltas (distância m, tempo s, FC média)."""
     file_id = FileIdMessage()
@@ -33,8 +35,10 @@ def build_fit(
     builder.add(file_id)
 
     cursor = start
-    for distance, duration, hr in laps:
+    for index, (distance, duration, hr) in enumerate(laps):
         lap = LapMessage()
+        if powers:
+            lap.avg_power = powers[index]
         lap.start_time = _ms(cursor)
         lap.timestamp = _ms(cursor + dt.timedelta(seconds=duration))
         lap.total_distance = distance
@@ -50,7 +54,9 @@ def build_fit(
         session = SessionMessage()
         session.start_time = _ms(start)
         session.timestamp = _ms(cursor)
-        session.sport = Sport.RUNNING
+        session.sport = sport
+        if powers:
+            session.avg_power = round(sum(powers) / len(powers))
         session.total_distance = sum(lap[0] for lap in laps)
         session.total_timer_time = sum(lap[1] for lap in laps)
         session.total_elapsed_time = sum(lap[1] for lap in laps)

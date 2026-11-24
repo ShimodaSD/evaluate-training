@@ -42,7 +42,7 @@ class GarminClient:
     def __exit__(self, *exc_info: object) -> None:
         self._http.close()
 
-    def search_running_activities(self, start: dt.date, end: dt.date) -> list[dict]:
+    def search_activities(self, start: dt.date, end: dt.date) -> list[dict]:
         activities: list[dict] = []
         while True:
             params = {
@@ -50,7 +50,6 @@ class GarminClient:
                 "limit": PAGE_SIZE,
                 "startDate": start.isoformat(),
                 "endDate": end.isoformat(),
-                "activityType": "running",
             }
             page = self._request("GET", SEARCH_PATH, params=params).json() or []
             activities.extend(page)

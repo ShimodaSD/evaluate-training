@@ -9,8 +9,9 @@ from app.services.plan_parser import parse_workout, parse_workouts
 START = dt.datetime(2026, 11, 16, 9, 0, tzinfo=dt.UTC)
 
 
-def _activity(laps: list[tuple[float, float]]) -> ParsedActivity:
+def _activity(laps: list[tuple[float, float]], sport: str = "run") -> ParsedActivity:
     return ParsedActivity(
+        sport=sport,
         start_time=START,
         distance_m=sum(d for d, _ in laps),
         duration_s=sum(t for _, t in laps),
@@ -95,3 +96,10 @@ def test_pausa_nao_conta_no_pace() -> None:
     assert result.steps is not None
     assert [s.pace_status for s in result.steps] == ["in_range", None, "in_range", None]
     assert result.pace_in_range_ratio == 1
+
+
+def test_natacao_tolera_3s_por_100m() -> None:
+    plan = parse_workout("1. Contínuo\n1000 m @ 01:45-01:50 min/100m")
+
+    assert compare_workout(plan, _activity([(1000, 1120)], "swim")).pace_status == "in_range"
+    assert compare_workout(plan, _activity([(1000, 1140)], "swim")).pace_status == "slow"

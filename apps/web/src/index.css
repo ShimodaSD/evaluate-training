@@ -210,6 +210,17 @@ summary:focus-visible {
   color: var(--text-secondary);
 }
 
+.hero__sports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
 .progress {
   height: 8px;
   background: var(--border);
@@ -464,6 +475,7 @@ summary:focus-visible {
 }
 
 .field input,
+.field select,
 .field textarea {
   font: inherit;
   font-weight: 400;

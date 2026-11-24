@@ -52,7 +52,7 @@ describe('ActivityUpload', () => {
     const user = userEvent.setup()
     render(<ActivityUpload onUploaded={vi.fn()} />)
 
-    await user.click(screen.getByRole('button', { name: /Sincronizar corridas do Garmin/ }))
+    await user.click(screen.getByRole('button', { name: /Sincronizar atividades do Garmin/ }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('GARMIN_PERSONAL_API_KEY')
     expect(fetchMock).toHaveBeenCalledWith('/api/garmin/sync', { method: 'POST' })

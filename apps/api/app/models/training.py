@@ -17,6 +17,7 @@ class PlannedWorkout(Base):
     raw_text: Mapped[str] = mapped_column(Text)
     structure: Mapped[dict] = mapped_column(JSON)
     total_distance_m: Mapped[float] = mapped_column(Float)
+    sport: Mapped[str] = mapped_column(String(10), default="run", server_default="run")
     created_at: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -35,7 +36,8 @@ class Activity(Base):
     duration_s: Mapped[float] = mapped_column(Float)
     avg_hr: Mapped[float | None] = mapped_column(Float)
     max_hr: Mapped[float | None] = mapped_column(Float)
-    sport: Mapped[str | None] = mapped_column(String(50))
+    avg_power_w: Mapped[float | None] = mapped_column(Float)
+    sport: Mapped[str] = mapped_column(String(50), default="run", server_default="run")
     laps: Mapped[list] = mapped_column(JSON, default=list)
     created_at: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()

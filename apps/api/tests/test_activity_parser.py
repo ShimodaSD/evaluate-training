@@ -2,6 +2,7 @@ import datetime as dt
 
 import pytest
 
+from app.services.activities import normalize_sport
 from app.services.activity_parser import ActivityParseError, parse_activity_file
 from tests.factories import build_fit, build_gpx, build_tcx
 
@@ -67,3 +68,20 @@ def test_formato_nao_suportado() -> None:
 def test_arquivo_corrompido() -> None:
     with pytest.raises(ActivityParseError, match="não foi possível ler"):
         parse_activity_file("treino.fit", b"isso nao e um fit")
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("running", "run"),
+        ("trail_running", "run"),
+        ("Biking", "bike"),
+        ("cycling", "bike"),
+        ("virtual_ride", "bike"),
+        ("lap_swimming", "swim"),
+        ("strength_training", "other"),
+        (None, "run"),
+    ],
+)
+def test_normaliza_o_esporte(raw: str | None, expected: str) -> None:
+    assert normalize_sport(raw) == expected

@@ -1,19 +1,25 @@
 import type { DaySummary } from '../api/types'
-import { formatKm, formatWeekday } from '../lib/format'
+import { formatClock, formatWeekday } from '../lib/format'
 
 const HEIGHT = 140
 const BAR = 14
 const GAP = 2
 
+// Planejado: meio da faixa estimada; passos sem alvo de pace não têm estimativa e contam 0.
+const estimate = (range: [number, number] | null) => (range ? (range[0] + range[1]) / 2 : 0)
+
 function dayTotals(day: DaySummary) {
-  const planned = day.workouts.reduce((sum, w) => sum + w.planned.total_distance_m, 0)
+  const planned = day.workouts.reduce(
+    (sum, w) => sum + estimate(w.planned.structure.estimated_duration_s),
+    0,
+  )
   const done =
-    day.workouts.reduce((sum, w) => sum + (w.activity?.distance_m ?? 0), 0) +
-    day.extra_activities.reduce((sum, a) => sum + a.distance_m, 0)
+    day.workouts.reduce((sum, w) => sum + (w.activity?.duration_s ?? 0), 0) +
+    day.extra_activities.reduce((sum, a) => sum + a.duration_s, 0)
   return { planned, done }
 }
 
-/** Barras agrupadas: km planejado x realizado por dia. */
+/** Barras agrupadas: tempo planejado x realizado por dia, a medida que soma todos os esportes. */
 export function DistanceChart({ days }: { days: DaySummary[] }) {
   const totals = days.map(dayTotals)
   const max = Math.max(1, ...totals.flatMap((t) => [t.planned, t.done]))
@@ -23,7 +29,7 @@ export function DistanceChart({ days }: { days: DaySummary[] }) {
     <section className="card" aria-labelledby="chart-title">
       <div className="chart__header">
         <h2 id="chart-title" className="card__label">
-          Volume por dia
+          Tempo por dia
         </h2>
         <ul className="legend">
           <li>
@@ -34,14 +40,14 @@ export function DistanceChart({ days }: { days: DaySummary[] }) {
           </li>
         </ul>
       </div>
-      <div className="chart" role="img" aria-label="Quilômetros planejados e realizados por dia">
+      <div className="chart" role="img" aria-label="Tempo planejado e realizado por dia">
         {days.map((day, i) => {
           const { planned, done } = totals[i]
           return (
             <div
               key={day.date}
               className="chart__day"
-              title={`${formatWeekday(day.date)}: ${formatKm(planned)} planejado, ${formatKm(done)} realizado`}
+              title={`${formatWeekday(day.date)}: ${formatClock(planned)} planejado, ${formatClock(done)} realizado`}
             >
               <svg width={BAR * 2 + GAP} height={HEIGHT} aria-hidden="true">
                 <rect
@@ -67,7 +73,7 @@ export function DistanceChart({ days }: { days: DaySummary[] }) {
         })}
       </div>
       <table className="visually-hidden">
-        <caption>Quilômetros por dia</caption>
+        <caption>Tempo por dia</caption>
         <thead>
           <tr>
             <th>Dia</th>
@@ -79,8 +85,8 @@ export function DistanceChart({ days }: { days: DaySummary[] }) {
           {days.map((day, i) => (
             <tr key={day.date}>
               <td>{formatWeekday(day.date)}</td>
-              <td>{formatKm(totals[i].planned)}</td>
-              <td>{formatKm(totals[i].done)}</td>
+              <td>{formatClock(totals[i].planned)}</td>
+              <td>{formatClock(totals[i].done)}</td>
             </tr>
           ))}
         </tbody>

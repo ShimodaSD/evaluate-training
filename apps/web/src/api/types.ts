@@ -1,3 +1,5 @@
+/** Paces vêm sempre em s/km; o esporte só muda a exibição. */
+export type Sport = 'run' | 'bike' | 'swim' | 'other'
 export type PaceStatus = 'in_range' | 'fast' | 'slow'
 export type WorkoutStatus = 'done' | 'partial' | 'missed' | 'planned'
 
@@ -9,6 +11,8 @@ export interface PlannedStep {
   duration_s: number | null
   pace_min_s_per_km: number | null
   pace_max_s_per_km: number | null
+  power_min_w: number | null
+  power_max_w: number | null
   zone_min: number | null
   zone_max: number | null
   is_rest: boolean
@@ -33,6 +37,7 @@ export interface PlannedWorkout {
   raw_text: string
   structure: PlannedWorkoutStructure
   total_distance_m: number
+  sport: Sport
 }
 
 export interface Activity {
@@ -45,6 +50,8 @@ export interface Activity {
   duration_s: number
   avg_hr: number | null
   max_hr: number | null
+  avg_power_w: number | null
+  sport: Sport
   pace_s_per_km: number | null
 }
 
@@ -57,10 +64,13 @@ export interface StepComparison {
   planned_duration_s: number | null
   target_pace_min_s_per_km: number | null
   target_pace_max_s_per_km: number | null
+  target_power_min_w: number | null
+  target_power_max_w: number | null
   actual_distance_m: number
   actual_duration_s: number
   actual_pace_s_per_km: number | null
   actual_avg_hr: number | null
+  actual_avg_power_w: number | null
   pace_status: PaceStatus | null
 }
 
@@ -89,14 +99,23 @@ export interface DaySummary {
   extra_activities: Activity[]
 }
 
+export interface SportTotals {
+  sport: Sport
+  planned_distance_m: number
+  actual_distance_m: number
+  actual_duration_s: number
+  planned_workouts: number
+  completed_workouts: number
+}
+
 export interface WeekSummary {
   week_start: string
   week_end: string
-  planned_distance_m: number
-  actual_distance_m: number
   planned_workouts: number
   completed_workouts: number
   adherence_pct: number | null
+  actual_duration_s: number
+  sports: SportTotals[]
   days: DaySummary[]
 }
 

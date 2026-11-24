@@ -7,7 +7,21 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Activity
-from app.schemas.activity import ParsedActivity
+from app.schemas.activity import ParsedActivity, Sport
+
+_SPORT_KEYWORDS: tuple[tuple[Sport, tuple[str, ...]], ...] = (
+    ("swim", ("swim",)),
+    ("bike", ("cycl", "bik", "ride")),
+    ("run", ("run",)),
+)
+
+
+def normalize_sport(raw: str | None) -> Sport:
+    """Mapeia o esporte do arquivo ou da Garmin ("running", "Biking", "lap_swimming"...)."""
+    if raw is None:
+        return "run"  # GPX sem <type>: o app nasceu só para corrida
+    value = raw.lower()
+    return next((s for s, words in _SPORT_KEYWORDS if any(w in value for w in words)), "other")
 
 
 def find_by_start_time(db: Session, start_time: dt.datetime) -> Activity | None:
@@ -36,7 +50,8 @@ def save_activity(
         duration_s=parsed.duration_s,
         avg_hr=parsed.avg_hr,
         max_hr=parsed.max_hr,
-        sport=parsed.sport,
+        avg_power_w=parsed.avg_power_w,
+        sport=normalize_sport(parsed.sport),
         laps=[lap.model_dump(mode="json", exclude_computed_fields=True) for lap in parsed.laps],
     )
     db.add(activity)

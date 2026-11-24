@@ -1,4 +1,10 @@
-import type { PlannedWorkout, PlannedWorkoutStructure, UploadResult, WeekSummary } from './types'
+import type {
+  PlannedWorkout,
+  PlannedWorkoutStructure,
+  Sport,
+  UploadResult,
+  WeekSummary,
+} from './types'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api'
 
@@ -27,8 +33,8 @@ export const weekKey = (day: string) => `/weeks/${day}`
 export const previewPlan = (text: string) =>
   request<PlannedWorkoutStructure[]>('/planned-workouts/preview', json({ text }))
 
-export const createPlannedWorkout = (scheduled_date: string, text: string) =>
-  request<PlannedWorkout>('/planned-workouts', json({ scheduled_date, text }))
+export const createPlannedWorkout = (scheduled_date: string, text: string, sport: Sport) =>
+  request<PlannedWorkout>('/planned-workouts', json({ scheduled_date, text, sport }))
 
 export const deletePlannedWorkout = (id: number) =>
   request<void>(`/planned-workouts/${id}`, { method: 'DELETE' })

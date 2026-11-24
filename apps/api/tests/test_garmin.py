@@ -52,13 +52,13 @@ def test_cliente_troca_a_chave_por_token_e_usa_bearer() -> None:
     fake = FakeGarmin([], {})
 
     with fake.client() as client:
-        client.search_running_activities(dt.date(2026, 11, 16), dt.date(2026, 11, 22))
+        client.search_activities(dt.date(2026, 11, 16), dt.date(2026, 11, 22))
 
     token_request, search_request = fake.requests
     assert token_request.method == "POST"
     assert token_request.headers["Authorization"] == "ApiKey chave"
     assert search_request.headers["Authorization"] == "Bearer jwt-token"
-    assert search_request.url.params["activityType"] == "running"
+    assert "activityType" not in search_request.url.params
     assert search_request.url.params["startDate"] == "2026-11-16"
 
 
@@ -66,7 +66,7 @@ def test_busca_pagina_ate_acabar() -> None:
     fake = FakeGarmin([{"activityId": n} for n in range(150)], {})
 
     with fake.client() as client:
-        result = client.search_running_activities(dt.date(2026, 11, 1), dt.date(2026, 11, 30))
+        result = client.search_activities(dt.date(2026, 11, 1), dt.date(2026, 11, 30))
 
     assert len(result) == 150
     assert [r.url.params["start"] for r in fake.requests[1:]] == ["0", "100"]
@@ -101,8 +101,9 @@ def test_sync_importa_e_nao_duplica(
 ) -> None:
     fake = FakeGarmin(
         [
-            {"activityId": 1, "activityName": "Rodagem"},
+            {"activityId": 1, "activityName": "Rodagem", "activityType": {"typeKey": "running"}},
             {"activityId": 2, "activityName": "Sem FIT"},
+            {"activityId": 3, "activityName": "Academia", "activityType": {"typeKey": "strength"}},
         ],
         {1: _zip("1.fit", build_fit(START, [(1000, 325, 150)] * 8)), 2: _zip("1.txt", b"x")},
     )
@@ -116,6 +117,7 @@ def test_sync_importa_e_nao_duplica(
     assert body["created"][0]["source"] == "garmin"
     assert body["created"][0]["distance_m"] == 8000
     assert "Sem FIT" in body["errors"]
+    assert "Academia" not in body["errors"] and body["skipped"] == []
 
     second = client.post("/api/garmin/sync", params={"start": "2026-11-16", "end": "2026-11-22"})
     assert second.json()["skipped"] == ["Rodagem"]

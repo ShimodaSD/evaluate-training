@@ -1,4 +1,12 @@
 /** Formatação de distâncias, paces e datas para exibição em pt-BR. */
+import type { Sport } from '../api/types'
+
+export const SPORT_LABEL: Record<Sport, string> = {
+  run: 'Corrida',
+  bike: 'Ciclismo',
+  swim: 'Natação',
+  other: 'Outro',
+}
 
 export function formatKm(meters: number): string {
   const km = meters / 1000
@@ -13,13 +21,29 @@ export function formatClock(totalSeconds: number): string {
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`
 }
 
-export function formatPace(secondsPerKm: number | null): string {
-  return secondsPerKm == null ? '—' : `${formatClock(secondsPerKm)}/km`
+const speed = (secondsPerKm: number) =>
+  (3600 / secondsPerKm).toLocaleString('pt-BR', { maximumFractionDigits: 1 })
+
+/** Pace em s/km exibido como o esporte usa: min/km, km/h ou min/100 m. */
+export function formatPace(secondsPerKm: number | null, sport: Sport = 'run'): string {
+  if (secondsPerKm == null) return '—'
+  if (sport === 'bike') return `${speed(secondsPerKm)} km/h`
+  if (sport === 'swim') return `${formatClock(secondsPerKm / 10)}/100m`
+  return `${formatClock(secondsPerKm)}/km`
 }
 
-export function formatPaceRange(min: number | null, max: number | null): string {
+export function formatPaceRange(min: number | null, max: number | null, sport: Sport = 'run') {
   if (min == null) return '—'
-  return max == null || max === min ? formatPace(min) : `${formatClock(min)}–${formatClock(max)}/km`
+  if (max == null || max === min) return formatPace(min, sport)
+  // No ciclismo o pace mais lento (max) é a menor velocidade.
+  if (sport === 'bike') return `${speed(max)}–${speed(min)} km/h`
+  if (sport === 'swim') return `${formatClock(min / 10)}–${formatClock(max / 10)}/100m`
+  return `${formatClock(min)}–${formatClock(max)}/km`
+}
+
+export function formatPower(min: number | null, max: number | null = min): string {
+  if (min == null) return '—'
+  return max == null || max === min ? `${Math.round(min)} W` : `${min}–${max} W`
 }
 
 /** Datas ISO (AAAA-MM-DD) tratadas como datas locais, sem fuso. */

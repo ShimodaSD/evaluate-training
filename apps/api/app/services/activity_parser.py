@@ -72,6 +72,7 @@ def parse_fit(content: bytes) -> ParsedActivity:
                         ),
                         avg_hr=_field(frame, "avg_heart_rate"),
                         max_hr=_field(frame, "max_heart_rate"),
+                        avg_power_w=_field(frame, "avg_power"),
                     )
                 )
             elif frame.name == "session" and session is None:
@@ -82,6 +83,7 @@ def parse_fit(content: bytes) -> ParsedActivity:
                     or _field(frame, "total_elapsed_time"),
                     "avg_hr": _field(frame, "avg_heart_rate"),
                     "max_hr": _field(frame, "max_heart_rate"),
+                    "avg_power_w": _field(frame, "avg_power"),
                     "sport": _field(frame, "sport"),
                 }
 
@@ -94,6 +96,7 @@ def parse_fit(content: bytes) -> ParsedActivity:
             "duration_s": sum(lap.duration_s for lap in laps),
             "avg_hr": None,
             "max_hr": max((lap.max_hr for lap in laps if lap.max_hr), default=None),
+            "avg_power_w": None,
             "sport": None,
         }
     if session["start_time"] is None:
@@ -105,6 +108,7 @@ def parse_fit(content: bytes) -> ParsedActivity:
         duration_s=float(session["duration_s"] or 0),
         avg_hr=session["avg_hr"],
         max_hr=session["max_hr"],
+        avg_power_w=session["avg_power_w"],
         sport=str(session["sport"]) if session["sport"] is not None else None,
         laps=laps,
     )

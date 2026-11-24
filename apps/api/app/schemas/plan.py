@@ -5,6 +5,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
+from app.schemas.activity import Sport
+
 
 class PlannedStep(BaseModel):
     """Um passo do treino: distância ou duração, com faixa de pace e zonas."""
@@ -14,8 +16,10 @@ class PlannedStep(BaseModel):
     intensity: str | None = None
     distance_m: float | None = None
     duration_s: int | None = None
-    pace_min_s_per_km: int | None = Field(default=None, description="Pace mais rápido da faixa")
-    pace_max_s_per_km: int | None = Field(default=None, description="Pace mais lento da faixa")
+    pace_min_s_per_km: float | None = Field(default=None, description="Pace mais rápido da faixa")
+    pace_max_s_per_km: float | None = Field(default=None, description="Pace mais lento da faixa")
+    power_min_w: float | None = None
+    power_max_w: float | None = None
     zone_min: int | None = None
     zone_max: int | None = None
     is_rest: bool = False
@@ -75,6 +79,7 @@ class PlanTextIn(BaseModel):
 class PlannedWorkoutCreate(PlanTextIn):
     scheduled_date: dt.date
     title: str | None = Field(default=None, max_length=200)
+    sport: Sport = "run"
 
 
 class PlannedWorkoutOut(BaseModel):
@@ -86,3 +91,4 @@ class PlannedWorkoutOut(BaseModel):
     raw_text: str
     structure: PlannedWorkoutStructure
     total_distance_m: float
+    sport: Sport
