@@ -23,9 +23,11 @@ class Settings(BaseSettings):
     garmin_base_url: str = "https://personal.connectapi.garmin.com"
     garmin_personal_api_key: SecretStr | None = None
 
-    # Avaliação da semana com o Claude (https://platform.claude.com)
-    anthropic_api_key: SecretStr | None = None
-    anthropic_model: str = "claude-opus-5-5"
+    # IA (avaliação da semana e leitura de treinos em qualquer formato) em qualquer API
+    # compatível com OpenAI: Ollama local (padrão), LM Studio, DeepSeek, Anthropic...
+    ai_base_url: str = "http://localhost:11434/v1"
+    ai_api_key: SecretStr | None = None
+    ai_model: str = "deepseek-r1:8b"
 
     @property
     def garmin_configured(self) -> bool:

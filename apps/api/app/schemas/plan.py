@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
 
 from app.schemas.activity import Sport
 
@@ -41,7 +41,13 @@ class RepeatBlock(BaseModel):
 
 
 class PlannedWorkoutStructure(BaseModel):
-    blocks: list[PlannedStep | RepeatBlock]
+    blocks: list[PlannedStep | RepeatBlock] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def _steps_have_size(self) -> PlannedWorkoutStructure:
+        if any(s.distance_m is None and s.duration_s is None for s in self.expanded_steps()):
+            raise ValueError("todo passo precisa de distância ou duração")
+        return self
 
     def expanded_steps(self) -> list[PlannedStep]:
         """Lista os passos na ordem em que são executados, com repetições expandidas."""
@@ -80,6 +86,8 @@ class PlannedWorkoutCreate(PlanTextIn):
     scheduled_date: dt.date
     title: str | None = Field(default=None, max_length=200)
     sport: Sport = "run"
+    # Estrutura já conferida pelo usuário no preview (lida pela IA); sem ela, o texto é lido.
+    structure: PlannedWorkoutStructure | None = None
 
 
 class PlannedWorkoutOut(BaseModel):

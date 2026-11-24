@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { analyzeWeek } from '../api/client'
 
-/** Avaliação da semana escrita pelo Claude, gerada sob demanda. */
+/** Avaliação da semana escrita pela IA, gerada sob demanda. */
 export function CoachCard({ day }: { day: string }) {
   const [analysis, setAnalysis] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -23,7 +23,7 @@ export function CoachCard({ day }: { day: string }) {
     <section className="card" aria-labelledby="coach-title" aria-busy={loading}>
       <div className="chart__header">
         <h2 id="coach-title" className="card__label">
-          Avaliação do Claude
+          Avaliação da IA
         </h2>
         <button
           type="button"
@@ -43,8 +43,8 @@ export function CoachCard({ day }: { day: string }) {
         <p className="coach__text">{analysis}</p>
       ) : (
         <p className="muted">
-          O Claude lê o planejado x realizado da semana e aponta o que foi bem, o que fugiu do plano
-          e o que ajustar.
+          A IA lê o planejado x realizado da semana e aponta o que foi bem, o que fugiu do plano e o
+          que ajustar.
         </p>
       )}
     </section>

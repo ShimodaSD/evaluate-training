@@ -8,14 +8,21 @@ import type {
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api'
 
-export class ApiError extends Error {}
+export class ApiError extends Error {
+  status: number
+
+  constructor(message: string, status: number) {
+    super(message)
+    this.status = status
+  }
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, init)
   if (!response.ok) {
     const body = (await response.json().catch(() => null)) as { detail?: unknown } | null
     const detail = typeof body?.detail === 'string' ? body.detail : `Erro ${response.status}`
-    throw new ApiError(detail)
+    throw new ApiError(detail, response.status)
   }
   return response.status === 204 ? (undefined as T) : ((await response.json()) as T)
 }
@@ -33,8 +40,12 @@ export const weekKey = (day: string) => `/weeks/${day}`
 export const previewPlan = (text: string) =>
   request<PlannedWorkoutStructure[]>('/planned-workouts/preview', json({ text }))
 
-export const createPlannedWorkout = (scheduled_date: string, text: string, sport: Sport) =>
-  request<PlannedWorkout>('/planned-workouts', json({ scheduled_date, text, sport }))
+export const createPlannedWorkout = (
+  scheduled_date: string,
+  text: string,
+  sport: Sport,
+  structure?: PlannedWorkoutStructure,
+) => request<PlannedWorkout>('/planned-workouts', json({ scheduled_date, text, sport, structure }))
 
 export const deletePlannedWorkout = (id: number) =>
   request<void>(`/planned-workouts/${id}`, { method: 'DELETE' })
