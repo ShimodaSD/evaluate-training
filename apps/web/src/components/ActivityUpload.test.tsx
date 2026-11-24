@@ -22,6 +22,7 @@ describe('ActivityUpload', () => {
               duration_s: 2600,
               avg_hr: null,
               max_hr: null,
+              sport: 'run',
               pace_s_per_km: 325,
             },
           ],
@@ -42,19 +43,5 @@ describe('ActivityUpload', () => {
     expect(onUploaded).toHaveBeenCalledOnce()
     const form = fetchMock.mock.calls[0][1]?.body as FormData
     expect(form.getAll('files')).toHaveLength(2)
-  })
-
-  it('sincroniza com o Garmin e mostra o erro de configuração', async () => {
-    const fetchMock = mockFetch({
-      '/api/garmin/sync': () =>
-        jsonResponse({ detail: 'Configure GARMIN_PERSONAL_API_KEY no arquivo .env' }, 400),
-    })
-    const user = userEvent.setup()
-    render(<ActivityUpload onUploaded={vi.fn()} />)
-
-    await user.click(screen.getByRole('button', { name: /Sincronizar atividades do Garmin/ }))
-
-    expect(await screen.findByRole('alert')).toHaveTextContent('GARMIN_PERSONAL_API_KEY')
-    expect(fetchMock).toHaveBeenCalledWith('/api/garmin/sync', { method: 'POST' })
   })
 })

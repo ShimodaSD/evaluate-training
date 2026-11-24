@@ -1,5 +1,5 @@
 import { useState, type DragEvent } from 'react'
-import { syncGarmin, uploadActivities } from '../api/client'
+import { uploadActivities } from '../api/client'
 import type { UploadResult } from '../api/types'
 import { formatKm, formatPace, formatWeekday } from '../lib/format'
 
@@ -55,14 +55,6 @@ export function ActivityUpload({ onUploaded }: { onUploaded: () => void }) {
         <strong>{uploading ? 'Enviando...' : 'Arraste os arquivos ou clique para escolher'}</strong>
         <span className="muted">FIT, GPX ou TCX exportados do Garmin Connect</span>
       </label>
-      <button
-        type="button"
-        className="button button--secondary"
-        disabled={uploading}
-        onClick={() => void run(syncGarmin)}
-      >
-        Sincronizar atividades do Garmin (últimos 7 dias)
-      </button>
       {error ? (
         <p className="alert alert--error" role="alert">
           {error}
@@ -75,7 +67,7 @@ export function ActivityUpload({ onUploaded }: { onUploaded: () => void }) {
               {result.created.map((a) => (
                 <li key={a.id}>
                   ✓ {formatWeekday(a.activity_date)}: {formatKm(a.distance_m)} ·{' '}
-                  {formatPace(a.pace_s_per_km)}
+                  {formatPace(a.pace_s_per_km, a.sport)}
                 </li>
               ))}
             </ul>

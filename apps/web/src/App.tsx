@@ -8,6 +8,7 @@ import { DayList } from './components/DayList'
 import { Dialog } from './components/Dialog'
 import { DistanceChart } from './components/DistanceChart'
 import { EmptyWeek } from './components/EmptyWeek'
+import { GarminSync } from './components/GarminSync'
 import { NextAction } from './components/NextAction'
 import { PlanForm } from './components/PlanForm'
 import { useWeek } from './hooks/useWeek'
@@ -71,6 +72,7 @@ function App() {
           ) : null}
         </div>
         <div className="topbar__actions">
+          <GarminSync onSynced={refreshWeeks} />
           <button
             type="button"
             className="button button--secondary"

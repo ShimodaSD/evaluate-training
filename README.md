@@ -142,7 +142,7 @@ Usa a [Garmin Connect Personal API](https://developer.garmin.com/gc-developer-pr
 1. Crie uma chave em https://connect.garmin.com/app/settings/personalApiToken
    (ela aparece uma única vez; validade de 30 dias a 1 ano).
 2. Coloque no `.env`: `GARMIN_PERSONAL_API_KEY=sua-chave`.
-3. No painel, em **Enviar atividade**, clique em **Sincronizar atividades do Garmin**
+3. No topo do painel, clique em **Sincronizar Garmin**
    (ou `POST /api/garmin/sync?start=AAAA-MM-DD&end=AAAA-MM-DD`; padrão: últimos 7 dias).
 
 A sincronização busca as corridas, pedais e natações do período (outros tipos, como
