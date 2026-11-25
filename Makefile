@@ -5,7 +5,6 @@ install:
 	cd apps/web && npm install
 
 up:
-	./scripts/ai-up.sh
 	docker compose up --build
 
 down:

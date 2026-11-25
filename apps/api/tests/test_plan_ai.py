@@ -35,8 +35,8 @@ def test_preview_usa_a_ia_quando_o_parser_falha(client: TestClient, llm: FakeLLM
     (workout,) = response.json()
     assert workout["total_distance_m"] == 1600
     (call,) = llm.requests
-    assert call["response_format"] == {"type": "json_object"}
-    assert call["messages"][1]["content"] == COACH_TEXT
+    assert call["output_config"]["format"]["type"] == "json_schema"
+    assert call["messages"][0]["content"] == COACH_TEXT
 
 
 def test_preview_do_trainingpeaks_nao_chama_a_ia(

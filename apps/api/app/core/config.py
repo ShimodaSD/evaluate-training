@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -23,11 +24,17 @@ class Settings(BaseSettings):
     garmin_base_url: str = "https://personal.connectapi.garmin.com"
     garmin_personal_api_key: SecretStr | None = None
 
-    # IA (avaliação da semana e leitura de treinos em qualquer formato) em qualquer API
-    # compatível com OpenAI: Ollama local (padrão), LM Studio, DeepSeek, Anthropic...
-    ai_base_url: str = "http://localhost:11434/v1"
-    ai_api_key: SecretStr | None = None
-    ai_model: str = "deepseek-r1:8b"
+    # IA da avaliação da semana e da leitura de treinos em qualquer formato.
+    # Gemini (chave grátis em https://aistudio.google.com/apikey) ou Claude (https://platform.claude.com)
+    ai_provider: Literal["gemini", "anthropic"] = "gemini"
+    gemini_api_key: SecretStr | None = None
+    gemini_model: str = "gemini-3.5-flash-lite"
+    anthropic_api_key: SecretStr | None = None
+    anthropic_model: str = "claude-haiku-5-5"
+
+    @property
+    def ai_model(self) -> str:
+        return self.gemini_model if self.ai_provider == "gemini" else self.anthropic_model
 
     @property
     def garmin_configured(self) -> bool:

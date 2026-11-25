@@ -24,9 +24,6 @@ services:
     volumes:
       - ./apps/api/app:/app/app
       - ./apps/api/migrations:/app/migrations
-    # Deixa a API alcançar o Ollama rodando no próprio Mac/PC (fora do Docker).
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     depends_on:
       db:
         condition: service_healthy
@@ -42,16 +39,5 @@ services:
     depends_on:
       - api
 
-  # Opcional, para quem não tem o Ollama instalado: docker compose --profile ollama up.
-  # No Mac o Docker não usa a GPU, então o Ollama instalado direto no Mac é bem mais rápido.
-  ollama:
-    image: ollama/ollama:0.12.6
-    profiles: ["ollama"]
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama-data:/root/.ollama
-
 volumes:
   db-data:
-  ollama-data:
