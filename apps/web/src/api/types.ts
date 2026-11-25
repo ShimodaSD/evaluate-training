@@ -124,3 +124,13 @@ export interface UploadResult {
   skipped: string[]
   errors: Record<string, string>
 }
+
+export interface TodayRecommendation {
+  readiness: 'alta' | 'moderada' | 'baixa'
+  sport: Sport | 'rest'
+  title: string
+  duration_min: number | null
+  workout: string
+  reason: string
+  unavailable: string[]
+}

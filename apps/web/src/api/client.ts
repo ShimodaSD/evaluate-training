@@ -2,6 +2,7 @@ import type {
   PlannedWorkout,
   PlannedWorkoutStructure,
   Sport,
+  TodayRecommendation,
   UploadResult,
   WeekSummary,
 } from './types'
@@ -58,6 +59,9 @@ export function uploadActivities(files: File[]) {
 
 export const analyzeWeek = (day: string) =>
   request<{ analysis: string }>(`/weeks/${day}/analysis`, { method: 'POST' })
+
+export const recommendToday = () =>
+  request<TodayRecommendation>('/recommendation/today', { method: 'POST' })
 
 export const syncGarmin = () => request<UploadResult>('/garmin/sync', { method: 'POST' })
 

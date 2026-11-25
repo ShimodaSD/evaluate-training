@@ -56,6 +56,9 @@ class GarminClient:
             if len(page) < PAGE_SIZE:
                 return activities
 
+    def get_json(self, path: str, params: dict | None = None) -> object:
+        return self._request("GET", path, params=params).json()
+
     def download_fit(self, activity_id: int | str) -> bytes:
         """Baixa o arquivo original (ZIP) e devolve o FIT de dentro dele."""
         content = self._request(
