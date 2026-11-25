@@ -32,7 +32,7 @@ export function TodayCard() {
   const readiness = rec ? READINESS[rec.readiness] : null
 
   return (
-    <section className="card" aria-labelledby="today-title" aria-busy={loading}>
+    <section className="card card--rust today" aria-labelledby="today-title" aria-busy={loading}>
       <div className="chart__header">
         <h2 id="today-title" className="card__label">
           Treino de hoje

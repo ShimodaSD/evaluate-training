@@ -7,7 +7,7 @@ export function AdherenceHero({ week }: { week: WeekSummary }) {
     ? (100 * week.completed_workouts) / week.planned_workouts
     : 0
   return (
-    <section className="card hero" aria-labelledby="hero-title">
+    <section className="card card--blue hero" aria-labelledby="hero-title">
       <h2 id="hero-title" className="card__label">
         Aderência da semana
       </h2>

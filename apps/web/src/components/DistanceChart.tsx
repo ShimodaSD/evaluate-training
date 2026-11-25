@@ -26,7 +26,7 @@ export function DistanceChart({ days }: { days: DaySummary[] }) {
   const scale = (m: number) => (m / max) * HEIGHT
 
   return (
-    <section className="card" aria-labelledby="chart-title">
+    <section className="card chart-card" aria-labelledby="chart-title">
       <div className="chart__header">
         <h2 id="chart-title" className="card__label">
           Tempo por dia

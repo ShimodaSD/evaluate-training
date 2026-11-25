@@ -20,7 +20,7 @@ export function CoachCard({ day }: { day: string }) {
   }
 
   return (
-    <section className="card" aria-labelledby="coach-title" aria-busy={loading}>
+    <section className="card coach" aria-labelledby="coach-title" aria-busy={loading}>
       <div className="chart__header">
         <h2 id="coach-title" className="card__label">
           Avaliação da IA

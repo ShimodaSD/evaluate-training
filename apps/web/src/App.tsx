@@ -37,40 +37,11 @@ function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <div>
-          <h1>Treinos</h1>
-          {week ? (
-            <nav className="week-nav" aria-label="Semana">
-              <button
-                type="button"
-                className="button button--ghost"
-                onClick={() => setDay(addDays(week.week_start, -7))}
-                aria-label="Semana anterior"
-              >
-                ←
-              </button>
-              <span>
-                {formatShortDate(week.week_start)} – {formatShortDate(week.week_end)}
-              </span>
-              <button
-                type="button"
-                className="button button--ghost"
-                onClick={() => setDay(addDays(week.week_start, 7))}
-                aria-label="Próxima semana"
-              >
-                →
-              </button>
-              {day !== today ? (
-                <button
-                  type="button"
-                  className="button button--ghost"
-                  onClick={() => setDay(today)}
-                >
-                  Hoje
-                </button>
-              ) : null}
-            </nav>
-          ) : null}
+        <div className="brand">
+          <span className="brand__logo" aria-hidden="true">
+            ↗
+          </span>
+          Treinos
         </div>
         <div className="topbar__actions">
           <GarminSync onSynced={refreshWeeks} />
@@ -82,10 +53,42 @@ function App() {
             Colar treino
           </button>
           <button type="button" className="button" onClick={() => setPanel('upload')}>
-            Enviar atividade
+            <span aria-hidden="true">+</span> Enviar atividade
           </button>
         </div>
       </header>
+
+      <div className="page-head">
+        <h1>Sua semana</h1>
+        {week ? (
+          <nav className="week-nav" aria-label="Semana">
+            <button
+              type="button"
+              className="button button--ghost"
+              onClick={() => setDay(addDays(week.week_start, -7))}
+              aria-label="Semana anterior"
+            >
+              ←
+            </button>
+            <span>
+              {formatShortDate(week.week_start)} – {formatShortDate(week.week_end)}
+            </span>
+            <button
+              type="button"
+              className="button button--ghost"
+              onClick={() => setDay(addDays(week.week_start, 7))}
+              aria-label="Próxima semana"
+            >
+              →
+            </button>
+            {day !== today ? (
+              <button type="button" className="button button--ghost" onClick={() => setDay(today)}>
+                Hoje
+              </button>
+            ) : null}
+          </nav>
+        ) : null}
+      </div>
 
       <main>
         {error ? (
@@ -102,8 +105,8 @@ function App() {
             <AdherenceHero week={week} />
             <NextAction week={week} today={today} onUpload={() => setPanel('upload')} />
             <TodayCard />
-            <CoachCard key={week.week_start} day={week.week_start} />
             <DistanceChart days={week.days} />
+            <CoachCard key={week.week_start} day={week.week_start} />
             <DayList days={week.days} today={today} onDelete={handleDelete} />
           </div>
         )}
