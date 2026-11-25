@@ -2,7 +2,7 @@ import datetime as dt
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.api.deps import DbSession
+from app.api.deps import AppSettings, DbSession, LLMClient
 from app.models import PlannedWorkout
 from app.schemas.plan import (
     PlannedWorkoutCreate,
@@ -10,6 +10,8 @@ from app.schemas.plan import (
     PlannedWorkoutStructure,
     PlanTextIn,
 )
+from app.services.llm import LLMError
+from app.services.plan_ai import parse_workouts_with_ai
 from app.services.plan_parser import PlanParseError, parse_workouts
 from app.services.planned_workouts import create_planned_workout, list_planned_workouts
 
@@ -17,12 +19,18 @@ router = APIRouter(prefix="/planned-workouts", tags=["treinos planejados"])
 
 
 @router.post("/preview", response_model=list[PlannedWorkoutStructure])
-def preview(payload: PlanTextIn) -> list[PlannedWorkoutStructure]:
-    """Interpreta o texto do TrainingPeaks sem salvar, para conferência."""
+def preview(
+    payload: PlanTextIn, settings: AppSettings, client: LLMClient
+) -> list[PlannedWorkoutStructure]:
+    """Interpreta o texto sem salvar, para conferência: TrainingPeaks primeiro, IA se falhar."""
     try:
         return parse_workouts(payload.text)
-    except PlanParseError as exc:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from exc
+    except PlanParseError as parse_error:
+        try:
+            return parse_workouts_with_ai(client, settings.ai_model, payload.text)
+        except LLMError as exc:
+            detail = f"{parse_error}. A IA também não conseguiu ler: {exc}"
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail) from exc
 
 
 @router.post("", response_model=PlannedWorkoutOut, status_code=status.HTTP_201_CREATED)

@@ -78,8 +78,8 @@ cd apps/api && uv run alembic revision --autogenerate -m "descricao"
 
 | Método | Rota | Descrição |
 | --- | --- | --- |
-| `POST` | `/api/planned-workouts/preview` | Interpreta o texto do TrainingPeaks sem salvar |
-| `POST` | `/api/planned-workouts` | Salva um treino planejado (`scheduled_date`, `text`, `title`, `sport`) |
+| `POST` | `/api/planned-workouts/preview` | Interpreta o texto sem salvar (TrainingPeaks; se falhar, IA) |
+| `POST` | `/api/planned-workouts` | Salva um treino planejado (`scheduled_date`, `text`, `title`, `sport` e, opcional, a `structure` conferida no preview) |
 | `GET` | `/api/planned-workouts?start=&end=` | Lista treinos planejados |
 | `DELETE` | `/api/planned-workouts/{id}` | Remove um treino planejado |
 | `POST` | `/api/activities/upload` | Upload de arquivos `.fit`, `.gpx` ou `.tcx` (campo `files`) |
@@ -151,14 +151,22 @@ musculação, são ignorados), baixa o arquivo FIT original de cada uma
 inclusive as enviadas antes por upload de arquivo. `/api/health` informa em
 `garmin_configured` se a chave foi definida.
 
-## Avaliação com o Claude
+## IA (avaliação da semana e treinos em qualquer formato)
 
-O card **Avaliação do Claude** no painel manda o planejado x realizado da semana para a
-API da Anthropic (modelo `claude-opus-5-5`, configurável em `ANTHROPIC_MODEL`) e mostra
-um parecer curto: veredito, o que foi bem, o que fugiu do plano e uma recomendação.
+A IA roda em qualquer API compatível com OpenAI, configurada no `.env` com `AI_BASE_URL`,
+`AI_MODEL` e, se precisar, `AI_API_KEY`. O padrão é um DeepSeek local no Ollama, sem custo:
 
-1. Crie uma chave em https://platform.claude.com/settings/keys
-2. Coloque no `.env`: `ANTHROPIC_API_KEY=sua-chave`
-3. Clique em **Avaliar semana** (ou `POST /api/weeks/{data}/analysis`).
+1. Instale o [Ollama](https://ollama.com/download) no Mac.
+2. Copie as linhas `AI_*` do `.env.example` para o `.env` e suba com `make up`. Ele inicia o
+   Ollama se estiver parado e baixa o `AI_MODEL` na primeira vez (`deepseek-r1:8b` tem 5 GB;
+   com 18 GB de RAM ou mais, `deepseek-r1:14b`, de 9 GB, lê melhor).
 
-Cada avaliação é uma chamada paga à API e só acontece quando você clica.
+Sem o Ollama instalado: `docker compose --profile ollama up`,
+`docker compose exec ollama ollama pull deepseek-r1:8b` e `AI_BASE_URL=http://ollama:11434/v1`
+(mais lento no Mac, porque o Docker não usa a GPU).
+
+- **Treinos em qualquer formato**: ao salvar, o texto passa primeiro pelo parser do
+  TrainingPeaks. Se ele não reconhecer o formato, a IA converte o texto nos passos do treino e o
+  formulário mostra o resultado para você conferir antes de **Confirmar e salvar**.
+- **Avaliação da semana**: o card **Avaliação da IA** manda o planejado x realizado da semana e
+  mostra um parecer curto: veredito, o que foi bem, o que fugiu do plano e uma recomendação.

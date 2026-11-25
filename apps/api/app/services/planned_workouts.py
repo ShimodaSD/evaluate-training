@@ -11,7 +11,7 @@ from app.services.plan_parser import parse_workout
 
 
 def create_planned_workout(db: Session, data: PlannedWorkoutCreate) -> PlannedWorkout:
-    structure = parse_workout(data.text)
+    structure = data.structure or parse_workout(data.text)
     workout = PlannedWorkout(
         scheduled_date=data.scheduled_date,
         title=data.title,
