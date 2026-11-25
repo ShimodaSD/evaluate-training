@@ -156,9 +156,10 @@ inclusive as enviadas antes por upload de arquivo. `/api/health` informa em
 A IA roda em qualquer API compatível com OpenAI, configurada no `.env` com `AI_BASE_URL`,
 `AI_MODEL` e, se precisar, `AI_API_KEY`. O padrão é um DeepSeek local no Ollama, sem custo:
 
-1. Instale o [Ollama](https://ollama.com/download) no Mac e rode `ollama pull deepseek-r1:8b`
-   (5 GB; com 18 GB de RAM ou mais, `deepseek-r1:14b`, de 9 GB, lê melhor).
-2. Copie as linhas `AI_*` do `.env.example` para o `.env` e suba com `make up`.
+1. Instale o [Ollama](https://ollama.com/download) no Mac.
+2. Copie as linhas `AI_*` do `.env.example` para o `.env` e suba com `make up`. Ele inicia o
+   Ollama se estiver parado e baixa o `AI_MODEL` na primeira vez (`deepseek-r1:8b` tem 5 GB;
+   com 18 GB de RAM ou mais, `deepseek-r1:14b`, de 9 GB, lê melhor).
 
 Sem o Ollama instalado: `docker compose --profile ollama up`,
 `docker compose exec ollama ollama pull deepseek-r1:8b` e `AI_BASE_URL=http://ollama:11434/v1`
