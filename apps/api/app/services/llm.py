@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Iterator
 from contextlib import contextmanager
 
 import anthropic
 import httpx
 from pydantic import BaseModel, ValidationError
+
+log = logging.getLogger("app.ia")
 
 
 class LLMError(RuntimeError):
@@ -16,6 +19,17 @@ class LLMError(RuntimeError):
 
 @contextmanager
 def _api_errors() -> Iterator[None]:
+    """Traduz os erros do SDK e da validação em LLMError e registra a causa no log."""
+    try:
+        with _translate_errors():
+            yield
+    except LLMError as exc:
+        log.warning("%s | causa: %r", exc, exc.__cause__)
+        raise
+
+
+@contextmanager
+def _translate_errors() -> Iterator[None]:
     try:
         yield
     except anthropic.AuthenticationError as exc:
@@ -59,7 +73,10 @@ def _gemini(client: httpx.Client, model: str, system: str, user: str, schema: di
     try:
         response = client.post(f"/models/{model}:generateContent", json=body)
     except httpx.HTTPError as exc:
+        log.warning("Gemini %s: sem conexão: %r", model, exc)
         raise LLMError("sem conexão com a API do Gemini") from exc
+    if response.is_error or '"candidates"' not in response.text:
+        log.warning("Gemini %s respondeu %s: %s", model, response.status_code, response.text[:2000])
 
     if response.status_code in (400, 401, 403) and "API key" in response.text:
         raise LLMError("GEMINI_API_KEY inválida")
@@ -75,10 +92,12 @@ def _gemini(client: httpx.Client, model: str, system: str, user: str, schema: di
     except (ValueError, KeyError, IndexError) as exc:  # pedido bloqueado vem sem candidates
         raise LLMError("o Gemini não conseguiu responder a este pedido") from exc
     if candidate.get("finishReason") == "MAX_TOKENS":
+        log.warning("Gemini %s cortou a resposta: %s", model, response.text[:2000])
         raise LLMError("a resposta do Gemini ficou incompleta")
     parts = candidate.get("content", {}).get("parts", [])
     text = "".join(p.get("text", "") for p in parts if not p.get("thought")).strip()
     if not text:
+        log.warning("Gemini %s sem texto: %s", model, response.text[:2000])
         raise LLMError("o Gemini devolveu uma resposta vazia")
     return text
 

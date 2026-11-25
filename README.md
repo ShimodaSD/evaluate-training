@@ -55,6 +55,17 @@ cd apps/api && uv run uvicorn app.main:app --reload
 cd apps/web && npm run dev
 ```
 
+## Log de erros
+
+Erros da IA (Gemini/Claude, com a resposta crua da API), da Garmin e toda resposta de erro da
+API (4xx/5xx) vão para o console e para `logs/api.log` (rotativo: 5 arquivos de 1 MB). Com
+Docker o arquivo fica em `./logs/api.log` na raiz do projeto; sem Docker, em
+`apps/api/logs/api.log`. Troque o caminho com `LOG_FILE`. Chaves de API nunca são registradas.
+
+```bash
+tail -f logs/api.log
+```
+
 ## Testes e qualidade
 
 ```bash

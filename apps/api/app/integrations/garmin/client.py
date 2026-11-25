@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import datetime as dt
 import io
+import logging
 import zipfile
 
 import httpx
@@ -17,6 +18,8 @@ TOKEN_PATH = "/personalapitoken-service/personal-api/personal-api-key/token"
 SEARCH_PATH = "/activitylist-service/activities/search/activities"
 DOWNLOAD_PATH = "/download-service/files/activity/{activity_id}"
 PAGE_SIZE = 100
+
+log = logging.getLogger("app.garmin")
 
 
 class GarminError(RuntimeError):
@@ -75,6 +78,14 @@ class GarminClient:
             response = self._http.request(method, path, **kwargs)
         except httpx.HTTPError as exc:
             raise GarminError(f"falha de conexão com a Garmin: {exc}") from exc
+        if response.is_error:
+            log.warning(
+                "Garmin %s %s respondeu %s: %s",
+                method,
+                path,
+                response.status_code,
+                response.text[:2000],
+            )
         if response.status_code in (401, 403):
             raise GarminError("chave da Garmin inválida ou expirada (GARMIN_PERSONAL_API_KEY)")
         if response.is_error:

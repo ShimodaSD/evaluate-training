@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://training:training@localhost:5432/training"
     cors_origins: list[str] = ["http://localhost:5173"]
     timezone: str = "America/Sao_Paulo"
+    log_file: str = "logs/api.log"
     # Dia em que a semana de treino começa (0 = segunda ... 6 = domingo).
     week_start_weekday: int = Field(default=1, ge=0, le=6)
 
