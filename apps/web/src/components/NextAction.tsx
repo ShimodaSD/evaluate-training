@@ -15,7 +15,7 @@ export function NextAction({ week, today, onUpload }: Props) {
 
   if (missed) {
     return (
-      <section className="card action">
+      <section className="card card--olive action">
         <h2 className="card__label">Falta registrar</h2>
         <p>
           O treino de {SPORT_LABEL[missed.planned.sport].toLowerCase()} de{' '}
@@ -32,7 +32,7 @@ export function NextAction({ week, today, onUpload }: Props) {
   if (next) {
     const isToday = next.planned.scheduled_date === today
     return (
-      <section className="card action">
+      <section className="card card--olive action">
         <h2 className="card__label">{isToday ? 'Treino de hoje' : 'Próximo treino'}</h2>
         <p>
           <strong>{isToday ? 'Hoje' : formatWeekday(next.planned.scheduled_date)}</strong>:{' '}
@@ -43,7 +43,7 @@ export function NextAction({ week, today, onUpload }: Props) {
     )
   }
   return (
-    <section className="card action">
+    <section className="card card--olive action">
       <h2 className="card__label">Semana</h2>
       <p>Todos os treinos planejados já foram avaliados.</p>
     </section>
