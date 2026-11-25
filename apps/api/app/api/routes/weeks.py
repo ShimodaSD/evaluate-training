@@ -29,6 +29,6 @@ def week_analysis(
     if not week.sports:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Não há treinos nesta semana")
     try:
-        return WeekAnalysis(analysis=analyze_week(client, settings.anthropic_model, week))
+        return WeekAnalysis(analysis=analyze_week(client, settings.ai_model, week))
     except LLMError as exc:
         raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from exc

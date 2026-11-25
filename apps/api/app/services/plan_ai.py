@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import anthropic
 from pydantic import BaseModel, Field
 
 from app.schemas.plan import PlannedWorkoutStructure
-from app.services.llm import parse
+from app.services.llm import LLMClient, parse
 
 
 class _AIWorkouts(BaseModel):
@@ -32,6 +31,6 @@ Regras:
 
 
 def parse_workouts_with_ai(
-    client: anthropic.Anthropic | None, model: str, text: str
+    client: LLMClient, model: str, text: str
 ) -> list[PlannedWorkoutStructure]:
     return parse(client, model, SYSTEM_PROMPT, text, _AIWorkouts).workouts

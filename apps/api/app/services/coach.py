@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import anthropic
-
 from app.schemas.comparison import WeekSummary
-from app.services.llm import chat
+from app.services.llm import LLMClient, chat
 
 SYSTEM_PROMPT = """Você é um treinador de endurance experiente avaliando a semana de um amador
 de corrida, ciclismo e natação. Você recebe, em JSON, o plano da semana (copiado do
@@ -33,5 +31,5 @@ Baseie-se só nos dados. Se faltarem dados (treino não feito, sem voltas, sem F
 vez de supor. Não dê conselho médico."""
 
 
-def analyze_week(client: anthropic.Anthropic | None, model: str, week: WeekSummary) -> str:
+def analyze_week(client: LLMClient, model: str, week: WeekSummary) -> str:
     return chat(client, model, SYSTEM_PROMPT, week.model_dump_json())

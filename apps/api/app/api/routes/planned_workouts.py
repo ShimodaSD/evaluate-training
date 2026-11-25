@@ -27,7 +27,7 @@ def preview(
         return parse_workouts(payload.text)
     except PlanParseError as parse_error:
         try:
-            return parse_workouts_with_ai(client, settings.anthropic_model, payload.text)
+            return parse_workouts_with_ai(client, settings.ai_model, payload.text)
         except LLMError as exc:
             detail = f"{parse_error}. A IA também não conseguiu ler: {exc}"
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail) from exc

@@ -1,4 +1,4 @@
-"""Chamadas ao Claude (API da Anthropic) usadas pela avaliação e pela leitura de treinos."""
+"""IA (Gemini ou Claude) usada pela avaliação da semana e pela leitura de treinos."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 
 import anthropic
+import httpx
 from pydantic import BaseModel, ValidationError
 
 
@@ -33,13 +34,53 @@ def _api_errors() -> Iterator[None]:
     except anthropic.APIConnectionError as exc:
         raise LLMError("sem conexão com a API da Anthropic") from exc
     except ValidationError as exc:  # regras do schema que o SDK confere do lado do cliente
-        raise LLMError("o Claude devolveu o treino fora do formato esperado") from exc
+        raise LLMError("a IA devolveu o treino fora do formato esperado") from exc
 
 
-def _require(client: anthropic.Anthropic | None) -> anthropic.Anthropic:
+# Cliente do provedor escolhido em AI_PROVIDER: httpx para o Gemini, SDK para o Claude.
+LLMClient = anthropic.Anthropic | httpx.Client | None
+
+
+def _require[C](client: C | None) -> C:
     if client is None:
-        raise LLMError("configure ANTHROPIC_API_KEY no arquivo .env")
+        raise LLMError("configure a chave da IA no .env (GEMINI_API_KEY ou ANTHROPIC_API_KEY)")
     return client
+
+
+def _gemini(client: httpx.Client, model: str, system: str, user: str, schema: dict | None) -> str:
+    config = (
+        {"responseMimeType": "application/json", "responseJsonSchema": schema} if schema else {}
+    )
+    body = {
+        "systemInstruction": {"parts": [{"text": system}]},
+        "contents": [{"role": "user", "parts": [{"text": user}]}],
+        "generationConfig": config,
+    }
+    try:
+        response = client.post(f"/models/{model}:generateContent", json=body)
+    except httpx.HTTPError as exc:
+        raise LLMError("sem conexão com a API do Gemini") from exc
+
+    if response.status_code in (400, 401, 403) and "API key" in response.text:
+        raise LLMError("GEMINI_API_KEY inválida")
+    if response.status_code == 429:
+        raise LLMError("limite de uso do Gemini atingido; tente mais tarde")
+    if response.status_code == 404:
+        raise LLMError(f"modelo {model!r} não existe no Gemini (ajuste GEMINI_MODEL)")
+    if response.is_error:
+        raise LLMError(f"a API do Gemini respondeu {response.status_code}")
+
+    try:
+        candidate = response.json()["candidates"][0]
+    except (ValueError, KeyError, IndexError) as exc:  # pedido bloqueado vem sem candidates
+        raise LLMError("o Gemini não conseguiu responder a este pedido") from exc
+    if candidate.get("finishReason") == "MAX_TOKENS":
+        raise LLMError("a resposta do Gemini ficou incompleta")
+    parts = candidate.get("content", {}).get("parts", [])
+    text = "".join(p.get("text", "") for p in parts if not p.get("thought")).strip()
+    if not text:
+        raise LLMError("o Gemini devolveu uma resposta vazia")
+    return text
 
 
 def _check(response: anthropic.types.Message) -> None:
@@ -49,7 +90,9 @@ def _check(response: anthropic.types.Message) -> None:
         raise LLMError("a resposta do Claude ficou incompleta")
 
 
-def chat(client: anthropic.Anthropic | None, model: str, system: str, user: str) -> str:
+def chat(client: LLMClient, model: str, system: str, user: str) -> str:
+    if isinstance(client, httpx.Client):
+        return _gemini(client, model, system, user, None)
     with _api_errors():
         response = _require(client).messages.create(
             model=model,
@@ -65,9 +108,13 @@ def chat(client: anthropic.Anthropic | None, model: str, system: str, user: str)
 
 
 def parse[T: BaseModel](
-    client: anthropic.Anthropic | None, model: str, system: str, user: str, output: type[T]
+    client: LLMClient, model: str, system: str, user: str, output: type[T]
 ) -> T:
-    """Resposta estruturada: a API segue o JSON Schema do modelo e o SDK valida com Pydantic."""
+    """Resposta estruturada: a API segue o JSON Schema do modelo e o Pydantic valida."""
+    if isinstance(client, httpx.Client):
+        text = _gemini(client, model, system, user, output.model_json_schema())
+        with _api_errors():
+            return output.model_validate_json(text)
     with _api_errors():
         response = _require(client).messages.parse(
             model=model,
@@ -78,5 +125,5 @@ def parse[T: BaseModel](
         )
     _check(response)
     if response.parsed_output is None:
-        raise LLMError("o Claude devolveu o treino fora do formato esperado")
+        raise LLMError("a IA devolveu o treino fora do formato esperado")
     return response.parsed_output

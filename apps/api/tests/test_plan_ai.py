@@ -54,7 +54,7 @@ def test_preview_rejeita_passo_sem_tamanho_vindo_da_ia(client: TestClient, llm: 
     assert response.status_code == 422
     detail = response.json()["detail"]
     assert "Linha 1" in detail
-    assert "A IA também não conseguiu ler: o Claude devolveu o treino fora do formato" in detail
+    assert "A IA também não conseguiu ler: a IA devolveu o treino fora do formato" in detail
 
 
 def test_salva_a_estrutura_conferida_sem_reler_o_texto(client: TestClient, llm: FakeLLM) -> None:

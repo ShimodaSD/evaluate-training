@@ -153,14 +153,18 @@ inclusive as enviadas antes por upload de arquivo. `/api/health` informa em
 
 ## IA (avaliação da semana e treinos em qualquer formato)
 
-A IA é o Claude Haiku (`claude-haiku-5-5`, o modelo mais barato da Anthropic), configurado
-no `.env`:
+A IA é configurada no `.env` com `AI_PROVIDER`:
 
-1. Crie uma chave em https://platform.claude.com/settings/keys e coloque créditos na conta.
-2. No `.env`: `ANTHROPIC_API_KEY=sua-chave` (troque de modelo com `ANTHROPIC_MODEL`).
+- **Gemini (padrão, grátis):** crie uma chave em https://aistudio.google.com/apikey e coloque
+  `GEMINI_API_KEY=sua-chave`. O modelo padrão é `gemini-3.5-flash-lite` (troque com
+  `GEMINI_MODEL`). No plano grátis o Google pode usar o conteúdo enviado para melhorar seus
+  produtos.
+- **Claude:** `AI_PROVIDER=anthropic` e `ANTHROPIC_API_KEY` (chave em
+  https://platform.claude.com/settings/keys, pago). Modelo padrão `claude-haiku-5-5`
+  (`ANTHROPIC_MODEL`).
 
-Cada chamada é paga e só acontece quando o parser do TrainingPeaks falha ou quando você clica
-em **Avaliar semana**.
+A IA só é chamada quando o parser do TrainingPeaks falha ou quando você clica em
+**Avaliar semana**.
 
 - **Treinos em qualquer formato**: ao salvar, o texto passa primeiro pelo parser do
   TrainingPeaks. Se ele não reconhecer o formato, a IA converte o texto nos passos do treino e o

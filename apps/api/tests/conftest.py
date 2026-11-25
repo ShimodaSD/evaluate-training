@@ -29,6 +29,7 @@ def settings() -> Settings:
     return Settings(
         _env_file=None,
         garmin_personal_api_key=None,
+        ai_provider="anthropic",
         anthropic_api_key=None,
         timezone="America/Sao_Paulo",
         week_start_weekday=0,
