@@ -2,7 +2,8 @@ import json
 from collections.abc import Iterator
 from pathlib import Path
 
-import httpx
+import anthropic
+import httpx2 as httpx  # o SDK da Anthropic usa o httpx2
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -28,20 +29,34 @@ def settings() -> Settings:
     return Settings(
         _env_file=None,
         garmin_personal_api_key=None,
+        anthropic_api_key=None,
         timezone="America/Sao_Paulo",
         week_start_weekday=0,
     )
 
 
 class FakeLLM:
-    """API de chat falsa: guarda os pedidos e devolve a resposta configurada (padrão: offline)."""
+    """API da Anthropic falsa: guarda os pedidos e devolve a resposta configurada."""
 
     def __init__(self) -> None:
         self.requests: list[dict] = []
         self.reply: httpx.Response | Exception = httpx.ConnectError("offline")
 
-    def answer(self, content: str) -> None:
-        self.reply = httpx.Response(200, json={"choices": [{"message": {"content": content}}]})
+    def answer(self, text: str, stop_reason: str = "end_turn") -> None:
+        self.reply = httpx.Response(
+            200,
+            json={
+                "id": "msg_1",
+                "type": "message",
+                "role": "assistant",
+                "model": "claude-haiku-5-5",
+                "content": [{"type": "thinking", "thinking": "", "signature": "x"}]
+                + [{"type": "text", "text": text}],
+                "stop_reason": stop_reason,
+                "stop_sequence": None,
+                "usage": {"input_tokens": 1, "output_tokens": 1},
+            },
+        )
 
     def handler(self, request: httpx.Request) -> httpx.Response:
         self.requests.append(json.loads(request.content))
@@ -73,8 +88,10 @@ def db() -> Iterator[Session]:
 def client(settings: Settings, db: Session, llm: FakeLLM) -> Iterator[TestClient]:
     app = create_app()
     app.dependency_overrides[get_settings] = lambda: settings
-    app.dependency_overrides[get_llm_client] = lambda: httpx.Client(
-        base_url="http://llm/v1", transport=httpx.MockTransport(llm.handler)
+    app.dependency_overrides[get_llm_client] = lambda: anthropic.Anthropic(
+        api_key="test",
+        max_retries=0,
+        http_client=httpx.Client(transport=httpx.MockTransport(llm.handler)),
     )
     app.dependency_overrides[get_db] = lambda: db
     with TestClient(app) as test_client:

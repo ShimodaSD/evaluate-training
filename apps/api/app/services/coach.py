@@ -1,8 +1,8 @@
-"""Avaliação da semana de treinos escrita pela IA."""
+"""Avaliação da semana de treinos escrita pelo Claude."""
 
 from __future__ import annotations
 
-import httpx
+import anthropic
 
 from app.schemas.comparison import WeekSummary
 from app.services.llm import chat
@@ -26,12 +26,12 @@ máximo 250 palavras:
 Objetivo de cada esporte para este atleta (avalie cada treino pelo objetivo do seu esporte):
 - Ciclismo: só manter a Zona 2 e acumular carga aeróbica. Pedal bom é o que fica em Z2 com
   potência estável; passar de Z2 é desvio do plano, não mérito. Não cobre intensidade na bike.
-- Corrida: desenvolvimento aeróbico e anaeróbico. Avalie os rodagens pela base aeróbica e os
+- Corrida: desenvolvimento aeróbico e anaeróbico. Avalie as rodagens pela base aeróbica e os
   tiros e intervalados pelo pace alvo dos passos fortes.
 
 Baseie-se só nos dados. Se faltarem dados (treino não feito, sem voltas, sem FC), diga isso em
 vez de supor. Não dê conselho médico."""
 
 
-def analyze_week(client: httpx.Client, model: str, week: WeekSummary) -> str:
+def analyze_week(client: anthropic.Anthropic | None, model: str, week: WeekSummary) -> str:
     return chat(client, model, SYSTEM_PROMPT, week.model_dump_json())

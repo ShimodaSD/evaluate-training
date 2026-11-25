@@ -35,8 +35,8 @@ def test_preview_usa_a_ia_quando_o_parser_falha(client: TestClient, llm: FakeLLM
     (workout,) = response.json()
     assert workout["total_distance_m"] == 1600
     (call,) = llm.requests
-    assert call["response_format"] == {"type": "json_object"}
-    assert call["messages"][1]["content"] == COACH_TEXT
+    assert call["output_config"]["format"]["type"] == "json_schema"
+    assert call["messages"][0]["content"] == COACH_TEXT
 
 
 def test_preview_do_trainingpeaks_nao_chama_a_ia(
@@ -54,7 +54,7 @@ def test_preview_rejeita_passo_sem_tamanho_vindo_da_ia(client: TestClient, llm: 
     assert response.status_code == 422
     detail = response.json()["detail"]
     assert "Linha 1" in detail
-    assert "A IA também não conseguiu ler: a IA devolveu o treino fora do formato" in detail
+    assert "A IA também não conseguiu ler: o Claude devolveu o treino fora do formato" in detail
 
 
 def test_salva_a_estrutura_conferida_sem_reler_o_texto(client: TestClient, llm: FakeLLM) -> None:

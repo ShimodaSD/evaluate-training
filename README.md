@@ -153,17 +153,14 @@ inclusive as enviadas antes por upload de arquivo. `/api/health` informa em
 
 ## IA (avaliação da semana e treinos em qualquer formato)
 
-A IA roda em qualquer API compatível com OpenAI, configurada no `.env` com `AI_BASE_URL`,
-`AI_MODEL` e, se precisar, `AI_API_KEY`. O padrão é um DeepSeek local no Ollama, sem custo:
+A IA é o Claude Haiku (`claude-haiku-5-5`, o modelo mais barato da Anthropic), configurado
+no `.env`:
 
-1. Instale o [Ollama](https://ollama.com/download) no Mac.
-2. Copie as linhas `AI_*` do `.env.example` para o `.env` e suba com `make up`. Ele inicia o
-   Ollama se estiver parado e baixa o `AI_MODEL` na primeira vez (`deepseek-r1:8b` tem 5 GB;
-   com 18 GB de RAM ou mais, `deepseek-r1:14b`, de 9 GB, lê melhor).
+1. Crie uma chave em https://platform.claude.com/settings/keys e coloque créditos na conta.
+2. No `.env`: `ANTHROPIC_API_KEY=sua-chave` (troque de modelo com `ANTHROPIC_MODEL`).
 
-Sem o Ollama instalado: `docker compose --profile ollama up`,
-`docker compose exec ollama ollama pull deepseek-r1:8b` e `AI_BASE_URL=http://ollama:11434/v1`
-(mais lento no Mac, porque o Docker não usa a GPU).
+Cada chamada é paga e só acontece quando o parser do TrainingPeaks falha ou quando você clica
+em **Avaliar semana**.
 
 - **Treinos em qualquer formato**: ao salvar, o texto passa primeiro pelo parser do
   TrainingPeaks. Se ele não reconhecer o formato, a IA converte o texto nos passos do treino e o
