@@ -15,12 +15,13 @@ export function TodayCard() {
   const [rec, setRec] = useState<TodayRecommendation | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [sport, setSport] = useState<'bike' | 'run'>('bike')
 
   async function handleClick() {
     setLoading(true)
     setError(null)
     try {
-      setRec(await recommendToday())
+      setRec(await recommendToday(sport))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Não foi possível recomendar o treino')
     } finally {
@@ -36,6 +37,13 @@ export function TodayCard() {
         <h2 id="today-title" className="card__label">
           Treino de hoje
         </h2>
+        <label>
+          Esporte{' '}
+          <select value={sport} onChange={(e) => setSport(e.target.value as 'bike' | 'run')}>
+            <option value="bike">{SPORT_LABEL.bike}</option>
+            <option value="run">{SPORT_LABEL.run}</option>
+          </select>
+        </label>
         <button
           type="button"
           className="button button--secondary"

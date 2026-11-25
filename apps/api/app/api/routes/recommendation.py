@@ -1,4 +1,5 @@
 import datetime as dt
+from typing import Literal
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, HTTPException, status
@@ -15,7 +16,10 @@ router = APIRouter(prefix="/recommendation", tags=["recomendação"])
 
 @router.post("/today", response_model=TodayRecommendationOut)
 def today_recommendation(
-    db: DbSession, settings: AppSettings, client: LLMClient
+    db: DbSession,
+    settings: AppSettings,
+    client: LLMClient,
+    sport: Literal["run", "bike"] = "bike",
 ) -> TodayRecommendationOut:
     """Treino de hoje sugerido pela IA com sono, HRV, carga e o plano da semana."""
     if not settings.garmin_configured:
@@ -27,9 +31,9 @@ def today_recommendation(
         with GarminClient(
             settings.garmin_personal_api_key.get_secret_value(), settings.garmin_base_url
         ) as garmin:
-            stats, unavailable = collect_garmin_stats(garmin, today)
+            stats, unavailable = collect_garmin_stats(db, garmin, today)
         week = build_week_summary(db, today, settings.week_start_weekday)
-        result = recommend_today(client, settings.ai_model, today, stats, week)
+        result = recommend_today(client, settings.ai_model, today, sport, stats, week)
     except (GarminError, LLMError) as exc:
         raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from exc
     return TodayRecommendationOut(**result.model_dump(), unavailable=unavailable)

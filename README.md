@@ -175,3 +175,6 @@ A IA só é chamada quando o parser do TrainingPeaks falha ou quando você clica
   sono, HRV, body battery, resumo diário (FC de repouso, estresse), VO2max e as atividades das
   últimas 4 semanas, junta com o plano da semana e devolve prontidão, treino sugerido e motivo.
   Fontes que a chave da Garmin não alcança aparecem como "sem dados" e não travam a recomendação.
+  Escolha **Ciclismo** (padrão, alvos em watts e Z2) ou **Corrida** no card. Os dados de bem-estar
+  ficam na tabela `garmin_wellness` (rode `make migrate`): dias passados vêm do banco e só o dia
+  de hoje é buscado de novo na Garmin.

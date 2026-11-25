@@ -8,7 +8,7 @@ describe('TodayCard', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   it('pede a recomendação e mostra treino, prontidão e motivo', async () => {
-    mockFetch({
+    const fetchMock = mockFetch({
       '/api/recommendation/today': () =>
         jsonResponse({
           readiness: 'baixa',
@@ -29,6 +29,9 @@ describe('TodayCard', () => {
     expect(screen.getByText(/Prontidão baixa/)).toBeInTheDocument()
     expect(screen.getByText(/HRV 38 ms/)).toBeInTheDocument()
     expect(screen.getByText(/Sem dados da Garmin de: vo2max/)).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith('/api/recommendation/today?sport=bike', {
+      method: 'POST',
+    })
   })
 
   it('mostra o erro quando a Garmin não está configurada', async () => {

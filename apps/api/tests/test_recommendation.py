@@ -20,7 +20,11 @@ AI_ANSWER = {
 }
 
 
+calls: list[httpx.Request] = []
+
+
 def _garmin(request: httpx.Request) -> httpx.Response:
+    calls.append(request)
     path = request.url.path
     if path.endswith("/token"):
         return httpx.Response(200, text="jwt")
@@ -52,7 +56,7 @@ def garmin(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
 def test_recomenda_com_o_que_a_garmin_tem(client: TestClient, llm: FakeLLM, garmin) -> None:
     llm.answer(json.dumps(AI_ANSWER))
 
-    response = client.post("/api/recommendation/today")
+    response = client.post("/api/recommendation/today", params={"sport": "run"})
 
     assert response.status_code == 200
     body = response.json()
@@ -62,8 +66,20 @@ def test_recomenda_com_o_que_a_garmin_tem(client: TestClient, llm: FakeLLM, garm
     content = call["messages"][0]["content"]
     assert "lastNightAvg" in content and "activityTrainingLoad" in content
     assert "lapCount" not in content  # só os campos de carga das atividades
-    assert '"semana"' in content
+    assert '"semana"' in content and '"esporte": "run"' in content
     assert "Nunca" in call["system"] and "recomende intensidade na bike" in call["system"]
+
+
+def test_dias_passados_vem_do_banco(client: TestClient, llm: FakeLLM, garmin) -> None:
+    llm.answer(json.dumps(AI_ANSWER))
+    client.post("/api/recommendation/today")
+    calls.clear()
+
+    client.post("/api/recommendation/today")
+
+    hrv_days = [r.url.path for r in calls if r.url.path.startswith("/hrv-service/")]
+    assert len(hrv_days) == 1  # só hoje é buscado de novo
+    assert llm.requests[-1]["messages"][0]["content"].count("lastNightAvg") == 7
 
 
 def test_sem_garmin_configurada(client: TestClient, llm: FakeLLM) -> None:
