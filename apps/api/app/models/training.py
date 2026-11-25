@@ -42,3 +42,16 @@ class Activity(Base):
     created_at: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+
+
+class GarminWellness(Base):
+    """Resposta crua da Garmin por fonte e dia; dias passados não são buscados de novo."""
+
+    __tablename__ = "garmin_wellness"
+
+    source: Mapped[str] = mapped_column(String(30), primary_key=True)
+    day: Mapped[dt.date] = mapped_column(Date, primary_key=True)
+    data: Mapped[dict | list | None] = mapped_column(JSON)
+    fetched_at: Mapped[dt.datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )

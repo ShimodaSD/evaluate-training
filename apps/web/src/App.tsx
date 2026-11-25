@@ -11,6 +11,7 @@ import { EmptyWeek } from './components/EmptyWeek'
 import { GarminSync } from './components/GarminSync'
 import { NextAction } from './components/NextAction'
 import { PlanForm } from './components/PlanForm'
+import { TodayCard } from './components/TodayCard'
 import { useWeek } from './hooks/useWeek'
 import { addDays, formatShortDate, toIsoDate } from './lib/format'
 
@@ -100,6 +101,7 @@ function App() {
           <div className="grid">
             <AdherenceHero week={week} />
             <NextAction week={week} today={today} onUpload={() => setPanel('upload')} />
+            <TodayCard />
             <CoachCard key={week.week_start} day={week.week_start} />
             <DistanceChart days={week.days} />
             <DayList days={week.days} today={today} onDelete={handleDelete} />
