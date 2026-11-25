@@ -93,3 +93,13 @@ def test_sem_chave_configurada(client: TestClient) -> None:
 
     assert response.status_code == 502
     assert "ANTHROPIC_API_KEY" in response.json()["detail"]
+
+
+def test_erro_do_claude_vai_para_o_log(client: TestClient, llm: FakeLLM, caplog) -> None:
+    _seed_week(client)
+    llm.reply = _error(400, "Your credit balance is too low")
+
+    client.post("/api/weeks/2026-11-19/analysis")
+
+    assert "sem créditos" in caplog.text
+    assert "credit balance is too low" in caplog.text

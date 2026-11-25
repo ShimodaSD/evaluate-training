@@ -24,6 +24,7 @@ services:
     volumes:
       - ./apps/api/app:/app/app
       - ./apps/api/migrations:/app/migrations
+      - ./logs:/app/logs
     depends_on:
       db:
         condition: service_healthy

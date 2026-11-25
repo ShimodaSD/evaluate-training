@@ -83,3 +83,16 @@ def test_gemini_e_o_padrao_e_usa_a_chave_do_env() -> None:
     assert client.headers["x-goog-api-key"] == "minha-chave"
     assert settings.ai_model == "gemini-3.5-flash-lite"
     assert list(get_llm_client(Settings(_env_file=None))) == [None]
+
+
+def test_erro_do_gemini_vai_para_o_log_sem_a_chave(
+    client: TestClient, gemini: FakeGemini, caplog: pytest.LogCaptureFixture
+) -> None:
+    gemini.reply = httpx.Response(503, json={"error": {"message": "modelo sobrecarregado"}})
+
+    client.post("/api/planned-workouts/preview", json={"text": COACH_TEXT})
+
+    assert "Gemini gemini-3.5-flash-lite respondeu 503" in caplog.text
+    assert "modelo sobrecarregado" in caplog.text
+    assert "POST /api/planned-workouts/preview -> 422" in caplog.text
+    assert "x-goog-api-key" not in caplog.text
